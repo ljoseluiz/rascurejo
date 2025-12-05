@@ -25,14 +25,15 @@ async function request(method, path, body, opts = {}) {
   const headers = Object.assign({ 'Content-Type': 'application/json' }, opts.headers || {})
   const fetchOpts = {
     method,
-    headers,
-    // include credentials so httpOnly cookies are sent to the backend
     credentials: 'include',
-    ...opts
+    ...opts,
+    headers // Override headers last to preserve them
   }
-  if (body !== undefined && body !== null) fetchOpts.body = JSON.stringify(body)
+  if (body !== undefined && body !== null) {
+    fetchOpts.body = JSON.stringify(body)
+    console.log(`[API] ${method} ${url} body:`, body)
+  }
 
-  console.log(`[API] ${method} ${url}`, body)
   const res = await fetch(url, fetchOpts)
   const contentType = res.headers.get('content-type') || ''
   if (!res.ok) {

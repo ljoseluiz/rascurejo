@@ -1,7 +1,137 @@
 {
   "products": [
-    { "id": 1, "name": "Camiseta básica", "sku": "CAM-001", "price": 29.9 },
-    { "id": 2, "name": "Calça jeans", "sku": "CAL-002", "price": 129.0 },
-    { "id": 3, "name": "Tênis esporte", "sku": "TEN-003", "price": 199.0 }
+    {
+      "id": 1,
+      "name": "Camiseta básica",
+      "sku": "CAM-001",
+      "barcode": "7891234567890",
+      "category": "Roupas",
+      "subcategory": "Camisetas",
+      "brand": "TechWear",
+      "supplier": "Fornecedor A",
+      "description": "Camiseta 100% algodão, conforto máximo para uso diário",
+      "prices": {
+        "sale": 29.90,
+        "promotion": 24.90,
+        "wholesale": 15.00
+      },
+      "unit": "un",
+      "images": [
+        { "id": 1, "url": "https://via.placeholder.com/300?text=Camiseta+1", "alt": "Camiseta vista frontal" }
+      ],
+      "variations": [
+        { "id": 1, "type": "Cor", "value": "Branco" },
+        { "id": 2, "type": "Tamanho", "value": "P" }
+      ],
+      "active": true,
+      "stock": 150,
+      "createdAt": "2024-01-15T10:00:00Z",
+      "updatedAt": "2024-01-15T10:00:00Z",
+      "history": [
+        {
+          "id": 1,
+          "type": "created",
+          "field": null,
+          "oldValue": null,
+          "newValue": null,
+          "changedBy": "admin",
+          "changedAt": "2024-01-15T10:00:00Z"
+        }
+      ]
+    },
+    {
+      "id": 2,
+      "name": "Calça jeans premium",
+      "sku": "CAL-002",
+      "barcode": "7891234567891",
+      "category": "Roupas",
+      "subcategory": "Calças",
+      "brand": "DenimCo",
+      "supplier": "Fornecedor B",
+      "description": "Calça jeans de alta qualidade, perfeita para o dia a dia",
+      "prices": {
+        "sale": 129.00,
+        "promotion": 99.90,
+        "wholesale": 70.00
+      },
+      "unit": "un",
+      "images": [
+        { "id": 1, "url": "https://via.placeholder.com/300?text=Calca+Jeans", "alt": "Calça jeans frontal" }
+      ],
+      "variations": [
+        { "id": 1, "type": "Tamanho", "value": "36" },
+        { "id": 2, "type": "Cor", "value": "Azul escuro" }
+      ],
+      "active": true,
+      "stock": 85,
+      "createdAt": "2024-01-16T14:30:00Z",
+      "updatedAt": "2024-01-16T14:30:00Z",
+      "history": [
+        {
+          "id": 1,
+          "type": "created",
+          "field": null,
+          "oldValue": null,
+          "newValue": null,
+          "changedBy": "admin",
+          "changedAt": "2024-01-16T14:30:00Z"
+        }
+      ]
+    },
+    {
+      "id": 3,
+      "name": "Tênis esporte profissional",
+      "sku": "TEN-003",
+      "barcode": "7891234567892",
+      "category": "Calçados",
+      "subcategory": "Tênis",
+      "brand": "SportMax",
+      "supplier": "Fornecedor C",
+      "description": "Tênis profissional com tecnologia de amortecimento avançado",
+      "prices": {
+        "sale": 199.90,
+        "promotion": 159.90,
+        "wholesale": 100.00
+      },
+      "unit": "par",
+      "images": [
+        { "id": 1, "url": "https://via.placeholder.com/300?text=Tenis+1", "alt": "Tênis lateral" }
+      ],
+      "variations": [
+        { "id": 1, "type": "Tamanho", "value": "42" },
+        { "id": 2, "type": "Cor", "value": "Preto/Vermelho" }
+      ],
+      "active": true,
+      "stock": 42,
+      "createdAt": "2024-01-17T09:15:00Z",
+      "updatedAt": "2024-01-17T09:15:00Z",
+      "history": [
+        {
+          "id": 1,
+          "type": "created",
+          "field": null,
+          "oldValue": null,
+          "newValue": null,
+          "changedBy": "admin",
+          "changedAt": "2024-01-17T09:15:00Z"
+        }
+      ]
+    }
+  ],
+  "categories": [
+    { "id": 1, "name": "Roupas", "description": "Vestuário em geral" },
+    { "id": 2, "name": "Calçados", "description": "Sapatos e tênis" },
+    { "id": 3, "name": "Acessórios", "description": "Acessórios diversos" },
+    { "id": 4, "name": "Alimentos", "description": "Produtos alimentícios" }
+  ],
+  "brands": [
+    { "id": 1, "name": "TechWear" },
+    { "id": 2, "name": "DenimCo" },
+    { "id": 3, "name": "SportMax" }
+  ],
+  "suppliers": [
+    { "id": 1, "name": "Fornecedor A", "contact": "contato@fornecedor-a.com", "phone": "(11) 98765-4321" },
+    { "id": 2, "name": "Fornecedor B", "contact": "vendas@fornecedor-b.com", "phone": "(11) 98765-4322" },
+    { "id": 3, "name": "Fornecedor C", "contact": "pedidos@fornecedor-c.com", "phone": "(11) 98765-4323" }
   ]
 }

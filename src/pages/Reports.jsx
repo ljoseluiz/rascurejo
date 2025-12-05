@@ -1,15 +1,30 @@
 import React, { useEffect, useState } from 'react'
-import { Box, Button, Input, HStack, Heading, Table, Thead, Tbody, Tr, Th, Td, useToast, VStack, Text } from '@chakra-ui/react'
+import { Box, Button, Input, HStack, Heading, Table, Thead, Tbody, Tr, Th, Td, useToast, VStack, Text, SimpleGrid, Spinner } from '@chakra-ui/react'
 import api from '../services/api'
 import { useAuth } from '../context/AuthContext'
+import { generateReportPdf } from '../utils/reportPdf'
 
 export default function Reports() {
   const auth = useAuth()
   const toast = useToast()
   const [sales, setSales] = useState([])
+  const [inventory, setInventory] = useState([])
+  const [products, setProducts] = useState([])
+  const [stats, setStats] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [loadingAll, setLoadingAll] = useState(true)
   const [startDate, setStartDate] = useState(new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0])
   const [endDate, setEndDate] = useState(new Date().toISOString().split('T')[0])
+
+  useEffect(() => {
+    async function bootstrap() {
+      setLoadingAll(true)
+      await Promise.all([loadReport(), loadInventory(), loadProducts(), loadStats()])
+      setLoadingAll(false)
+    }
+    bootstrap()
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [auth.csrfToken])
 
   async function loadReport() {
     setLoading(true)
@@ -21,6 +36,36 @@ export default function Reports() {
       toast({ title: 'Erro', description: err.message, status: 'error', duration: 3000, isClosable: true })
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function loadInventory() {
+    try {
+      const opts = api.injectCsrf({}, auth.csrfToken)
+      const data = await api.get('/inventory?limit=100', opts)
+      setInventory(data.items || [])
+    } catch (err) {
+      toast({ title: 'Erro ao carregar estoque', description: err.message, status: 'error', duration: 3000, isClosable: true })
+    }
+  }
+
+  async function loadProducts() {
+    try {
+      const opts = api.injectCsrf({}, auth.csrfToken)
+      const data = await api.get('/products?limit=100', opts)
+      setProducts(data.items || [])
+    } catch (err) {
+      toast({ title: 'Erro ao carregar produtos', description: err.message, status: 'error', duration: 3000, isClosable: true })
+    }
+  }
+
+  async function loadStats() {
+    try {
+      const opts = api.injectCsrf({}, auth.csrfToken)
+      const data = await api.get('/stats', opts)
+      setStats(data || {})
+    } catch (err) {
+      toast({ title: 'Erro ao carregar estatísticas', description: err.message, status: 'error', duration: 3000, isClosable: true })
     }
   }
 
@@ -45,6 +90,18 @@ export default function Reports() {
     toast({ title: 'Exportado', description: 'Relatório exportado com sucesso', status: 'success', duration: 2000, isClosable: true })
   }
 
+  function printPdf(type) {
+    const dateRange = `${startDate} a ${endDate}`
+    generateReportPdf({
+      type,
+      dateRange,
+      sales,
+      inventory,
+      products,
+      stats: stats || {}
+    })
+  }
+
   return (
     <Box>
       <Heading mb={6}>Relatórios de Vendas</Heading>
@@ -58,11 +115,22 @@ export default function Reports() {
             <Button onClick={loadReport} colorScheme="blue" isLoading={loading}>Gerar</Button>
             <Button onClick={exportCSV} colorScheme="green">Exportar CSV</Button>
           </HStack>
+          <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={3}>
+            <Button colorScheme="blue" variant="outline" onClick={() => printPdf('sales')} isDisabled={!sales.length}>PDF Vendas</Button>
+            <Button colorScheme="teal" variant="outline" onClick={() => printPdf('inventory')} isDisabled={!inventory.length}>PDF Estoque</Button>
+            <Button colorScheme="purple" variant="outline" onClick={() => printPdf('products')} isDisabled={!products.length}>PDF Produtos</Button>
+            <Button colorScheme="orange" variant="solid" onClick={() => printPdf('overview')} isDisabled={!stats}>PDF Executivo</Button>
+          </SimpleGrid>
         </VStack>
       </Box>
 
       {/* Sales table */}
-      {sales.length > 0 ? (
+      {loadingAll ? (
+        <HStack spacing={3}>
+          <Spinner />
+          <Text>Carregando dados...</Text>
+        </HStack>
+      ) : sales.length > 0 ? (
         <Box bg="white" borderRadius="md" boxShadow="sm" overflowX="auto">
           <Table>
             <Thead>
