@@ -1,0 +1,37 @@
+{
+  "name": "varejix-retail-admin",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "mock": "json-server --watch db.json --port 3000",
+    "mock:express": "node mock/server.js",
+    "mock:express:watch": "nodemon mock/server.js"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router-dom": "^6.14.1",
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2",
+    "jsonwebtoken": "^9.0.0",
+    "cookie-parser": "^1.4.6",
+    "express-session": "^1.17.3",
+    "memorystore": "^1.6.7",
+    "@chakra-ui/react": "^2.8.0",
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "framer-motion": "^10.12.16",
+    "recharts": "^2.10.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "@vitejs/plugin-react": "^4.0.0",
+    "json-server": "^0.17.3",
+    "nodemon": "^2.0.22",
+    "@playwright/test": "^1.40.0"
+  }
+}
