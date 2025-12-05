@@ -1,91 +1,166 @@
-# Varejix — Gestão Varejista (esqueleto)
+# Varejix — Sistema de Gestão Varejista
 
-Projeto inicial para um painel de gestão varejista feito com React + Vite (JavaScript).
+Aplicação web completa para gestão de varejo com React + Vite (JavaScript) e backend mock Express.
 
-Quick start (PowerShell):
+## 🚀 Quick Start
 
 ```powershell
-cd c:\Apps\varejix
+cd C:\Apps\varejix
 npm install
-npm run dev
-```
 
-Comandos úteis:
-
-- `npm run dev` — inicia servidor de desenvolvimento (Vite)
-- `npm run build` — cria build de produção
-- `npm run preview` — pré-visualiza o build de produção localmente
-
-Próximos passos sugeridos:
-
-- Escolher solução de roteamento (React Router) e criar `src/routes/*`
-- Decidir estado global (Context, Redux, Zustand)
-- Especificar API backend (endpoints REST/GraphQL) e criar `src/services/api.js`
-- Adicionar testes com `vitest` e `testing-library/react`
-
-This scaffold now includes routing and an example API client:
-
-- Routes are in `src/routes/AppRoutes.jsx` and pages in `src/pages/`.
-- API client: `src/services/api.js` — small fetch wrapper using `VITE_API_BASE_URL`.
-
-Example: `src/pages/Products.jsx` uses `api.get('/products')` and falls back to sample data if the backend is unavailable.
-
-Local backend options (quick start)
-
-1) Mock with `json-server` (recommended to start quickly)
-
-```powershell
-cd c:\Apps\varejix
-npm install
-npm run mock    # starts json-server on port 3000
-npm run dev     # starts Vite dev server on 5173
-```
-
-The dev server is configured to proxy `/api/*` to `http://localhost:3000`.
-`src/services/api.js` will, in development, automatically route requests through `/api` if
-`VITE_API_BASE_URL` is not set. The mock `db.json` contains a `/products` collection for testing.
-
-2) Mock with Express (auth, protected endpoints, pagination)
-
-This scaffold also includes a small Express mock server that supports:
-- `POST /auth/login` — accepts `{ username, password }` and returns `{ user }` (demo user: `admin` / `password`) while setting an httpOnly cookie `auth_token` for subsequent authenticated requests.
-- `GET /products?q=&page=&limit=` — public, supports filtering and pagination, returns `{ items, total, page, limit }`.
-- Protected routes: `GET /inventory`, `GET /sales`, `POST /products` (require authentication; the app sends credentials so the server reads the httpOnly cookie).
- 
-CSRF mitigation (development mock)
-
-- The Express mock sets a non-httpOnly cookie `csrf_token` on successful login (double-submit cookie pattern).
-- For state-changing requests (POST/PUT/DELETE) the frontend automatically reads `csrf_token` from `document.cookie` and sends it in the `X-CSRF-Token` header. The mock server verifies header === cookie for these requests.
-- The dev server is configured to include credentials so cookies are sent automatically (`fetch` uses `credentials: 'include'`).
-
-To test CSRF protection:
-
-1. Start the Express mock and dev server:
-
-```powershell
+# Terminal 1 - Backend mock
 npm run mock:express:watch
+
+# Terminal 2 - Frontend dev server
 npm run dev
 ```
 
-2. Login at `http://localhost:5173/login` (admin/password). The mock will set `auth_token` (httpOnly) and `csrf_token` (readable).
-3. Use the UI to create a product (or call POST `/products`) — the frontend will send `X-CSRF-Token` header matching the `csrf_token` cookie.
-4. If you attempt a state-changing request without the header or with an invalid header, the server will return HTTP 403.
+Acesse: **http://localhost:5173**  
+Login: `admin` / `password`
 
-Start the Express mock:
+## 📦 Funcionalidades
 
-```powershell
-npm run mock:express       # run once
-npm run mock:express:watch # run with nodemon for auto-reload during development
+- ✅ Autenticação com JWT + httpOnly cookies
+- ✅ Proteção CSRF (tokens em sessão)
+- ✅ CRUD completo de produtos (criar, editar, deletar)
+- ✅ Dashboard com gráficos (vendas, produtos, clientes)
+- ✅ Relatórios com filtros e exportação CSV
+- ✅ Paginação e busca de produtos
+- ✅ UI com Chakra UI + animações Framer Motion
+- ✅ Testes E2E com Playwright
+
+## 🛠️ Comandos
+
+### Desenvolvimento
+- `npm run dev` — Vite dev server (http://localhost:5173)
+- `npm run mock:express:watch` — Backend mock com auto-reload (http://localhost:3000)
+- `npm run build` — Build de produção
+- `npm run preview` — Pré-visualiza build
+
+### Testes
+- `npx playwright test` — Roda testes E2E headless
+- `npx playwright test --ui` — Testes E2E com UI interativa
+
+## 📂 Estrutura
+
+```
+src/
+├── components/         # Componentes reutilizáveis
+│   ├── Header.jsx
+│   ├── ProductCard.jsx
+│   ├── ProductForm.jsx
+│   └── ProductEdit.jsx
+├── context/           # Estado global (Auth, CSRF)
+│   └── AuthContext.jsx
+├── pages/             # Páginas/rotas
+│   ├── Dashboard.jsx  # KPIs + gráficos
+│   ├── Products.jsx   # Lista + CRUD
+│   ├── Reports.jsx    # Relatórios com CSV
+│   ├── Login.jsx
+│   └── Logout.jsx
+├── routes/            # Configuração de rotas
+│   ├── AppRoutes.jsx
+│   └── RequireAuth.jsx
+├── services/          # API client
+│   └── api.js
+└── main.jsx           # Entry point
+
+mock/
+└── server.js          # Express mock com auth, CSRF, CRUD
+
+e2e/
+└── auth-and-products.spec.js  # Testes Playwright
 ```
 
-When using the Express mock you can either:
-- Keep `VITE_API_BASE_URL` empty and let `src/services/api.js` route to `/api/*` (Vite proxy will forward to the mock), or
-- Set `VITE_API_BASE_URL=http://localhost:3000` in `.env` to use direct host calls.
+## 🔐 Autenticação & Segurança
 
-3) Using a real backend
+### Backend Mock (Express)
+- **JWT tokens** com 2h de expiração
+- **httpOnly cookies** para persistência segura
+- **Sessões server-side** (MemoryStore) com CSRF tokens
+- **CSRF protection** em POST/PUT/DELETE (token em session)
 
-- Create a `.env` file with `VITE_API_BASE_URL=http://your-backend:port` and restart the dev server.
-- Ensure the backend either allows CORS or that you use a reverse proxy in front of it. In production the
-	build will be compiled with the base URL available at build time.
+### Endpoints
+```
+POST   /auth/login      # { username, password } → retorna user + csrfToken
+GET    /auth/me         # Retorna usuário atual (via cookie)
+GET    /auth/csrf       # Retorna token CSRF (cria se não existir)
+POST   /auth/logout     # Limpa cookies
 
-Contribuições: abra uma issue ou PR com a proposta.
+GET    /products        # Paginado: ?q=termo&page=1&limit=10
+POST   /products        # Cria produto (requer auth + CSRF)
+PUT    /products/:id    # Atualiza (requer auth + CSRF)
+DELETE /products/:id    # Deleta (requer auth + CSRF)
+
+GET    /stats           # Dashboard: totalProducts, totalSales, recentSales
+GET    /reports/sales   # Relatório: ?startDate=...&endDate=...
+```
+
+### Modo Dev (flexível)
+- `ensureAuth`: permite acesso sem token (req.user = null)
+- `verifyCsrf`: permite requests sem CSRF (com warning no console)
+
+Para produção, remova os warnings e reforce validação.
+
+## 🌐 Configuração de API
+
+### Desenvolvimento (padrão)
+Sem `.env`, o frontend usa proxy Vite: `/api/*` → `http://localhost:3000`
+
+### Produção ou dev direto
+Crie `.env`:
+```env
+VITE_API_BASE_URL=http://localhost:3000
+```
+
+Reinicie `npm run dev` após criar/editar `.env`.
+
+## 🧪 Testes E2E
+
+Testes incluídos:
+- Login e logout
+- Criação de produtos
+- Edição de produtos
+- Deleção com confirmação
+- Busca e paginação
+- Rotas protegidas (redirect)
+
+Rodar:
+```powershell
+npx playwright test
+```
+
+## 🎨 Stack Técnica
+
+**Frontend:**
+- React 18.2 + Vite 5
+- React Router 6
+- Chakra UI 2.8 + Framer Motion 10
+- Recharts 2.10 (gráficos)
+
+**Backend Mock:**
+- Express 4.18
+- jsonwebtoken 9 (JWT)
+- express-session 1.17 + memorystore 1.6
+- cookie-parser, body-parser, cors
+
+**Testes:**
+- Playwright 1.40
+
+## 📝 Próximos Passos
+
+- [ ] Substituir MemoryStore por Redis (sessions persistentes)
+- [ ] Adicionar gerenciamento de estoque (baixas automáticas)
+- [ ] Implementar módulo de clientes
+- [ ] Relatórios avançados (lucro, margem, ABC)
+- [ ] Deploy: frontend (Vercel/Netlify) + backend (Render/Fly)
+- [ ] Autenticação OAuth (Google, Microsoft)
+
+## 🤝 Contribuições
+
+Abra uma issue ou PR com propostas de melhorias.
+
+---
+
+**Desenvolvido por:** [cristovao-pereira](https://github.com/cristovao-pereira)  
+**Repositório:** [varejix](https://github.com/cristovao-pereira/varejix)
