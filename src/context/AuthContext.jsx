@@ -21,9 +21,10 @@ export function AuthProvider({ children }) {
             setCsrfToken(c.csrfToken)
           }
         } catch (e) {
-          // ignore
+          console.warn('Failed to fetch CSRF token:', e.message)
         }
       } catch (err) {
+        console.debug('User not authenticated on mount:', err.message)
         setUser(null)
       } finally {
         setLoading(false)

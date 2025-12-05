@@ -32,10 +32,12 @@ async function request(method, path, body, opts = {}) {
   }
   if (body !== undefined && body !== null) fetchOpts.body = JSON.stringify(body)
 
+  console.log(`[API] ${method} ${url}`, body)
   const res = await fetch(url, fetchOpts)
   const contentType = res.headers.get('content-type') || ''
   if (!res.ok) {
     const text = await res.text()
+    console.warn(`[API] Response ${res.status}:`, text)
     const err = new Error(`HTTP ${res.status}: ${text}`)
     err.status = res.status
     throw err
@@ -46,19 +48,9 @@ async function request(method, path, body, opts = {}) {
 
 // wrapper to include CSRF token header for state-changing requests
 const originalGet = (path, opts) => request('GET', path, undefined, opts)
-const originalPost = (path, body, opts) => {
-  const headers = Object.assign({}, (opts && opts.headers) || {})
-  // CSRF will be injected by a wrapper component if needed
-  return request('POST', path, body, Object.assign({}, opts || {}, { headers }))
-}
-const originalPut = (path, body, opts) => {
-  const headers = Object.assign({}, (opts && opts.headers) || {})
-  return request('PUT', path, body, Object.assign({}, opts || {}, { headers }))
-}
-const originalDelete = (path, body, opts) => {
-  const headers = Object.assign({}, (opts && opts.headers) || {})
-  return request('DELETE', path, body, Object.assign({}, opts || {}, { headers }))
-}
+const originalPost = (path, body, opts) => request('POST', path, body, opts)
+const originalPut = (path, body, opts) => request('PUT', path, body, opts)
+const originalDelete = (path, body, opts) => request('DELETE', path, body, opts)
 
 // helper to inject CSRF from context
 function injectCsrf(opts, csrfToken) {
