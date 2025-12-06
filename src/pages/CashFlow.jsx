@@ -25,7 +25,23 @@ import {
   HStack,
   Text,
   Progress,
+  VStack,
+  Divider,
 } from '@chakra-ui/react'
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
+  Area,
+  AreaChart,
+} from 'recharts'
 import { useAuth } from '../context/AuthContext'
 import api from '../services/api'
 
@@ -75,6 +91,32 @@ export default function CashFlow() {
   }
 
   const periods = cashFlow.cash_flow || []
+
+  // Preparar dados para gráficos
+  const chartData = periods.map((period) => ({
+    periodo: period.period,
+    entradas: period.expected_inflow || 0,
+    saidas: period.expected_outflow || 0,
+    saldo: period.balance || 0,
+  }))
+
+  // Dados acumulados para gráfico de área
+  let saldoAcumulado = cashFlow.total_balance || 0
+  const areaChartData = periods.map((period) => {
+    saldoAcumulado += (period.expected_inflow || 0) - (period.expected_outflow || 0)
+    return {
+      periodo: period.period,
+      saldoAcumulado: saldoAcumulado,
+    }
+  })
+
+  // Formatador de moeda para tooltips
+  const formatCurrency = (value) => {
+    return value.toLocaleString('pt-BR', {
+      style: 'currency',
+      currency: 'BRL',
+    })
+  }
 
   return (
     <Box p={6}>
@@ -137,6 +179,83 @@ export default function CashFlow() {
                   })}
                 </StatNumber>
               </Stat>
+            </CardBody>
+          </Card>
+        </SimpleGrid>
+
+        {/* Gráficos de Fluxo de Caixa */}
+        <Card>
+          <CardBody>
+            <Heading size="md" mb={4}>
+              Projeção de Saldo por Período
+            </Heading>
+            <Divider mb={4} />
+            <ResponsiveContainer width="100%" height={300}>
+              <AreaChart data={areaChartData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="periodo" />
+                <YAxis tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`} />
+                <Tooltip formatter={(value) => formatCurrency(value)} />
+                <Legend />
+                <Area
+                  type="monotone"
+                  dataKey="saldoAcumulado"
+                  name="Saldo Acumulado"
+                  stroke="#3182CE"
+                  fill="#63B3ED"
+                  strokeWidth={2}
+                />
+              </AreaChart>
+            </ResponsiveContainer>
+          </CardBody>
+        </Card>
+
+        <SimpleGrid columns={{ base: 1, md: 2 }} spacing={4}>
+          {/* Gráfico de Entradas vs Saídas */}
+          <Card>
+            <CardBody>
+              <Heading size="md" mb={4}>
+                Entradas vs Saídas
+              </Heading>
+              <Divider mb={4} />
+              <ResponsiveContainer width="100%" height={300}>
+                <BarChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="periodo" />
+                  <YAxis tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`} />
+                  <Tooltip formatter={(value) => formatCurrency(value)} />
+                  <Legend />
+                  <Bar dataKey="entradas" name="Entradas" fill="#48BB78" />
+                  <Bar dataKey="saidas" name="Saídas" fill="#F56565" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardBody>
+          </Card>
+
+          {/* Gráfico de Linha - Saldo por Período */}
+          <Card>
+            <CardBody>
+              <Heading size="md" mb={4}>
+                Evolução do Saldo
+              </Heading>
+              <Divider mb={4} />
+              <ResponsiveContainer width="100%" height={300}>
+                <LineChart data={chartData}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="periodo" />
+                  <YAxis tickFormatter={(value) => `R$ ${(value / 1000).toFixed(0)}k`} />
+                  <Tooltip formatter={(value) => formatCurrency(value)} />
+                  <Legend />
+                  <Line
+                    type="monotone"
+                    dataKey="saldo"
+                    name="Saldo Previsto"
+                    stroke="#805AD5"
+                    strokeWidth={3}
+                    dot={{ r: 6 }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
             </CardBody>
           </Card>
         </SimpleGrid>
@@ -339,16 +458,6 @@ export default function CashFlow() {
           </SimpleGrid>
         </Box>
       </Stack>
-    </Box>
-  )
-}
-
-// VStack component imported but not available, need to add it
-function VStack({ children, ...props }) {
-  const { spacing = 0, align = 'stretch', ...rest } = props
-  return (
-    <Box display="flex" flexDirection="column" gap={spacing} {...rest}>
-      {children}
     </Box>
   )
 }
