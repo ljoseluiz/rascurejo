@@ -53,6 +53,11 @@ let stockMovements = Array.isArray(db.stock_movements) ? db.stock_movements.slic
 let stockLevels = Array.isArray(db.stock_levels) ? db.stock_levels.slice() : []
 let stockBatches = Array.isArray(db.stock_batches) ? db.stock_batches.slice() : []
 let stockAlerts = Array.isArray(db.stock_alerts) ? db.stock_alerts.slice() : []
+let accountsPayable = Array.isArray(db.accounts_payable) ? db.accounts_payable.slice() : []
+let accountsReceivable = Array.isArray(db.accounts_receivable) ? db.accounts_receivable.slice() : []
+let cashBoxes = Array.isArray(db.cash_boxes) ? db.cash_boxes.slice() : []
+let cashMovements = Array.isArray(db.cash_movements) ? db.cash_movements.slice() : []
+let cashFlowForecast = Array.isArray(db.cash_flow_forecast) ? db.cash_flow_forecast.slice() : []
 
 // Debug middleware
 app.use((req, res, next) => {
@@ -531,6 +536,28 @@ app.get('/products/brands', (req, res) => {
 app.get('/products/suppliers', (req, res) => {
   const supplierNames = suppliers.map(s => s.name)
   res.json(supplierNames)
+})
+
+// GET /products/units - Listar unidades de medida (pré-definidas)
+app.get('/products/units', (req, res) => {
+  const units = [
+    { id: 1, name: 'un', label: 'Unidade' },
+    { id: 2, name: 'kg', label: 'Quilograma' },
+    { id: 3, name: 'g', label: 'Grama' },
+    { id: 4, name: 'l', label: 'Litro' },
+    { id: 5, name: 'ml', label: 'Mililitro' },
+    { id: 6, name: 'm', label: 'Metro' },
+    { id: 7, name: 'cm', label: 'Centímetro' },
+    { id: 8, name: 'par', label: 'Par' },
+    { id: 9, name: 'caixa', label: 'Caixa' },
+    { id: 10, name: 'pacote', label: 'Pacote' },
+    { id: 11, name: 'fardo', label: 'Fardo' },
+    { id: 12, name: 'cx', label: 'Caixa (cx)' },
+    { id: 13, name: 'saco', label: 'Saco' },
+    { id: 14, name: 'm²', label: 'Metro Quadrado' },
+    { id: 15, name: 'm³', label: 'Metro Cúbico' }
+  ]
+  res.json(units)
 })
 
 // ============================================
@@ -1700,6 +1727,238 @@ app.get('/stock/reports/audit', ensureAuth, (req, res) => {
   }
   
   res.json({ items, summary })
+})
+
+// ==================== FINANCIAL MODULE ====================
+
+// Suppliers
+app.get('/suppliers', (req, res) => {
+  res.json({ items: suppliers })
+})
+
+app.post('/suppliers', ensureAuth, verifyCsrf, (req, res) => {
+  const { name, cnpj, email, phone, address, city, state } = req.body
+  if (!name || !cnpj) return res.status(400).json({ error: 'Nome e CNPJ obrigatórios' })
+  
+  const newSupplier = {
+    id: Math.max(...suppliers.map(s => s.id), 0) + 1,
+    name, cnpj, email, phone, address, city, state,
+    active: true,
+    created_at: new Date().toISOString()
+  }
+  suppliers.push(newSupplier)
+  res.status(201).json(newSupplier)
+})
+
+// Accounts Payable
+app.get('/financial/accounts-payable', (req, res) => {
+  const { status, page = 1, limit = 10 } = req.query
+  let items = accountsPayable
+  
+  if (status) items = items.filter(a => a.status === status)
+  
+  const total = items.length
+  const start = (page - 1) * limit
+  const paged = items.slice(start, start + limit)
+  
+  res.json({ items: paged, total, page: parseInt(page), limit: parseInt(limit) })
+})
+
+app.post('/financial/accounts-payable', ensureAuth, verifyCsrf, (req, res) => {
+  const { supplier_id, invoice_number, amount, due_date, payment_method, description } = req.body
+  if (!supplier_id || !amount || !due_date) return res.status(400).json({ error: 'Campos obrigatórios faltando' })
+  
+  const supplier = suppliers.find(s => s.id === supplier_id)
+  const newPayable = {
+    id: Math.max(...accountsPayable.map(a => a.id), 0) + 1,
+    supplier_id,
+    supplier_name: supplier?.name || 'Desconhecido',
+    invoice_number,
+    amount: parseFloat(amount),
+    due_date,
+    status: 'pending',
+    payment_method,
+    description,
+    created_at: new Date().toISOString(),
+    paid_at: null,
+    notes: ''
+  }
+  accountsPayable.push(newPayable)
+  res.status(201).json(newPayable)
+})
+
+app.put('/financial/accounts-payable/:id/pay', ensureAuth, verifyCsrf, (req, res) => {
+  const id = parseInt(req.params.id)
+  const item = accountsPayable.find(a => a.id === id)
+  if (!item) return res.status(404).json({ error: 'Conta a pagar não encontrada' })
+  
+  item.status = 'paid'
+  item.paid_at = new Date().toISOString()
+  res.json(item)
+})
+
+// Accounts Receivable
+app.get('/financial/accounts-receivable', (req, res) => {
+  const { status, page = 1, limit = 10 } = req.query
+  let items = accountsReceivable
+  
+  if (status) items = items.filter(a => a.status === status)
+  
+  const total = items.length
+  const start = (page - 1) * limit
+  const paged = items.slice(start, start + limit)
+  
+  res.json({ items: paged, total, page: parseInt(page), limit: parseInt(limit) })
+})
+
+app.post('/financial/accounts-receivable', ensureAuth, verifyCsrf, (req, res) => {
+  const { customer_name, amount, due_date, payment_method, description, installments = 1 } = req.body
+  if (!customer_name || !amount || !due_date) return res.status(400).json({ error: 'Campos obrigatórios faltando' })
+  
+  const newReceivable = {
+    id: Math.max(...accountsReceivable.map(a => a.id), 0) + 1,
+    customer_id: null,
+    customer_name,
+    sale_date: new Date().toISOString().split('T')[0],
+    amount: parseFloat(amount),
+    due_date,
+    status: 'pending',
+    installments: parseInt(installments),
+    current_installment: 1,
+    payment_method,
+    description,
+    created_at: new Date().toISOString(),
+    paid_at: null,
+    received_at: null,
+    notes: ''
+  }
+  accountsReceivable.push(newReceivable)
+  res.status(201).json(newReceivable)
+})
+
+app.put('/financial/accounts-receivable/:id/receive', ensureAuth, verifyCsrf, (req, res) => {
+  const id = parseInt(req.params.id)
+  const item = accountsReceivable.find(a => a.id === id)
+  if (!item) return res.status(404).json({ error: 'Conta a receber não encontrada' })
+  
+  item.status = 'received'
+  item.received_at = new Date().toISOString()
+  res.json(item)
+})
+
+// Cash Boxes
+app.get('/financial/cash-boxes', (req, res) => {
+  res.json({ items: cashBoxes })
+})
+
+app.get('/financial/cash-boxes/:id/balance', (req, res) => {
+  const id = parseInt(req.params.id)
+  const box = cashBoxes.find(c => c.id === id)
+  if (!box) return res.status(404).json({ error: 'Caixa não encontrada' })
+  
+  const movements = cashMovements.filter(m => m.cash_box_id === id)
+  const balance = box.balance
+  
+  res.json({ box, movements, balance })
+})
+
+// Cash Movements
+app.post('/financial/cash-movements', ensureAuth, verifyCsrf, (req, res) => {
+  const { cash_box_id, type, category, amount, description, reference } = req.body
+  if (!cash_box_id || !type || !amount) return res.status(400).json({ error: 'Campos obrigatórios' })
+  
+  const newMovement = {
+    id: Math.max(...cashMovements.map(m => m.id), 0) + 1,
+    cash_box_id: parseInt(cash_box_id),
+    type,
+    category,
+    amount: parseFloat(amount),
+    description,
+    reference,
+    created_at: new Date().toISOString(),
+    created_by: req.user?.username || 'admin'
+  }
+  
+  // Update cash box balance
+  const box = cashBoxes.find(c => c.id === newMovement.cash_box_id)
+  if (box) {
+    if (type === 'entry') box.balance += newMovement.amount
+    else if (type === 'exit' || type === 'transfer') box.balance -= newMovement.amount
+  }
+  
+  cashMovements.push(newMovement)
+  res.status(201).json(newMovement)
+})
+
+// Cash Flow Forecast
+app.get('/financial/cash-flow', (req, res) => {
+  const pendingPayables = accountsPayable
+    .filter(a => a.status === 'pending' || a.status === 'overdue')
+    .reduce((sum, a) => sum + a.amount, 0)
+  
+  const pendingReceivables = accountsReceivable
+    .filter(a => a.status === 'pending' || a.status === 'overdue')
+    .reduce((sum, a) => sum + a.amount, 0)
+  
+  const totalBalance = cashBoxes.reduce((sum, c) => sum + c.balance, 0)
+  
+  res.json({
+    cash_flow: cashFlowForecast,
+    total_balance: totalBalance,
+    pending_payables: pendingPayables,
+    pending_receivables: pendingReceivables,
+    net_flow: pendingReceivables - pendingPayables
+  })
+})
+
+// Financial Dashboard / Reports
+app.get('/financial/dashboard', (req, res) => {
+  const totalPayable = accountsPayable.reduce((sum, a) => sum + a.amount, 0)
+  const totalReceivable = accountsReceivable.reduce((sum, a) => sum + a.amount, 0)
+  const overduPayables = accountsPayable.filter(a => a.status === 'overdue').reduce((sum, a) => sum + a.amount, 0)
+  const overdueReceivables = accountsReceivable.filter(a => a.status === 'overdue').reduce((sum, a) => sum + a.amount, 0)
+  const totalBalance = cashBoxes.reduce((sum, c) => sum + c.balance, 0)
+  
+  const dailyMovements = cashMovements
+    .filter(m => {
+      const today = new Date().toISOString().split('T')[0]
+      return m.created_at.startsWith(today)
+    })
+    .reduce((acc, m) => {
+      const type = m.type === 'entry' ? 'entries' : 'exits'
+      acc[type] = (acc[type] || 0) + m.amount
+      return acc
+    }, {})
+  
+  res.json({
+    summary: {
+      total_payable: totalPayable,
+      total_receivable: totalReceivable,
+      overdue_payables: overduPayables,
+      overdue_receivables: overdueReceivables,
+      total_balance: totalBalance,
+      daily_entries: dailyMovements.entries || 0,
+      daily_exits: dailyMovements.exits || 0
+    },
+    pending_payables: accountsPayable.filter(a => a.status === 'pending' || a.status === 'overdue').slice(0, 5),
+    pending_receivables: accountsReceivable.filter(a => a.status === 'pending' || a.status === 'overdue').slice(0, 5)
+  })
+})
+
+// Financial Reports
+app.get('/financial/reports/dre', (req, res) => {
+  const totalSales = accountsReceivable.filter(a => a.status === 'received').reduce((sum, a) => sum + a.amount, 0)
+  const totalCosts = accountsPayable.filter(a => a.status === 'paid').reduce((sum, a) => sum + a.amount, 0)
+  const profit = totalSales - totalCosts
+  const margin = ((profit / totalSales) * 100).toFixed(2)
+  
+  res.json({
+    revenue: totalSales,
+    costs: totalCosts,
+    profit,
+    margin: parseFloat(margin),
+    type: 'DRE Simplificado'
+  })
 })
 
 app.listen(PORT, () => {

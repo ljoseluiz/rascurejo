@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Box, VStack, Button, Text, Icon, Flex, IconButton, Divider, Collapse } from '@chakra-ui/react'
 import { Link as RouterLink, useLocation } from 'react-router-dom'
-import { FiHome, FiBox, FiLayers, FiShoppingCart, FiBarChart2, FiSettings, FiX, FiChevronDown, FiChevronRight, FiList, FiPlus, FiPackage, FiTrendingUp, FiFileText } from 'react-icons/fi'
+import { FiHome, FiBox, FiLayers, FiShoppingCart, FiBarChart2, FiSettings, FiX, FiChevronDown, FiChevronRight, FiList, FiPlus, FiPackage, FiTrendingUp, FiFileText, FiDollarSign } from 'react-icons/fi'
 
 const links = [
   { to: '/', label: 'Dashboard', icon: FiHome },
@@ -24,13 +24,25 @@ const links = [
   },
   { to: '/inventory', label: 'Inventário', icon: FiLayers },
   { to: '/sales', label: 'Vendas', icon: FiShoppingCart },
+  {
+    label: 'Financeiro',
+    icon: FiDollarSign,
+    submenu: [
+      { to: '/financial', label: 'Dashboard', icon: FiHome },
+      { to: '/financial/accounts-payable', label: 'Contas a Pagar', icon: FiFileText },
+      { to: '/financial/accounts-receivable', label: 'Contas a Receber', icon: FiFileText },
+      { to: '/financial/cash-box', label: 'Caixa', icon: FiDollarSign },
+      { to: '/financial/cash-flow', label: 'Fluxo de Caixa', icon: FiTrendingUp },
+      { to: '/financial/reports', label: 'Relatórios', icon: FiBarChart2 }
+    ]
+  },
   { to: '/reports', label: 'Relatórios', icon: FiBarChart2 },
   { to: '/settings', label: 'Configurações', icon: FiSettings }
 ]
 
 export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation()
-  const [expandedMenus, setExpandedMenus] = useState({ Produtos: true, Estoque: true })
+  const [expandedMenus, setExpandedMenus] = useState({ Produtos: true, Estoque: true, Financeiro: false })
 
   const isActive = (path) => location.pathname === path
   

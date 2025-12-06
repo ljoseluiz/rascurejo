@@ -12,6 +12,12 @@ import StockReports from '../pages/StockReports'
 import Sales from '../pages/Sales'
 import Reports from '../pages/Reports'
 import Settings from '../pages/Settings'
+import AccountsPayable from '../pages/AccountsPayable'
+import AccountsReceivable from '../pages/AccountsReceivable'
+import CashBox from '../pages/CashBox'
+import CashFlow from '../pages/CashFlow'
+import FinancialReports from '../pages/FinancialReports'
+import FinancialDashboard from '../pages/FinancialDashboard'
 import NotFound from '../pages/NotFound'
 import Login from '../pages/Login'
 import Logout from '../pages/Logout'
@@ -32,6 +38,12 @@ export default function AppRoutes() {
       <Route path="/sales" element={<RequireAuth><Sales /></RequireAuth>} />
       <Route path="/reports" element={<RequireAuth><Reports /></RequireAuth>} />
       <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
+      <Route path="/financial" element={<RequireAuth><FinancialDashboard /></RequireAuth>} />
+      <Route path="/financial/accounts-payable" element={<RequireAuth><AccountsPayable /></RequireAuth>} />
+      <Route path="/financial/accounts-receivable" element={<RequireAuth><AccountsReceivable /></RequireAuth>} />
+      <Route path="/financial/cash-box" element={<RequireAuth><CashBox /></RequireAuth>} />
+      <Route path="/financial/cash-flow" element={<RequireAuth><CashFlow /></RequireAuth>} />
+      <Route path="/financial/reports" element={<RequireAuth><FinancialReports /></RequireAuth>} />
       <Route path="/login" element={<Login />} />
       <Route path="/logout" element={<Logout />} />
       <Route path="*" element={<NotFound />} />

@@ -3,7 +3,7 @@ import { Box, Heading, Text, Badge, HStack, IconButton, VStack, Image } from '@c
 import { EditIcon, DeleteIcon } from '@chakra-ui/icons'
 
 export default function ProductCard({ product, onEdit, onDelete, onView }) {
-  const { name, sku, prices, stock, active, category, brand, images } = product || {}
+  const { name, sku, prices, stock, active, category, brand, unit, images } = product || {}
   const imageUrl = images && images[0]?.url
 
   return (
@@ -35,7 +35,7 @@ export default function ProductCard({ product, onEdit, onDelete, onView }) {
         </HStack>
         
         <Text fontSize="xs" color="gray.600">SKU: {sku}</Text>
-        <Text fontSize="xs" color="gray.600">{category} • {brand}</Text>
+        <Text fontSize="xs" color="gray.600">{category} • {brand} • {unit}</Text>
         
         <HStack justify="space-between" w="full" pt={2}>
           <VStack align="start" spacing={0}>

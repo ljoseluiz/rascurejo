@@ -85,6 +85,7 @@ export default function ProductForm({ product = null, onSubmit = () => {}, onCre
   const [categories, setCategories] = useState([])
   const [brands, setBrands] = useState([])
   const [suppliers, setSuppliers] = useState([])
+  const [units, setUnits] = useState([])
 
   const {
     register,
@@ -104,14 +105,16 @@ export default function ProductForm({ product = null, onSubmit = () => {}, onCre
     async function loadMeta() {
       setLoadingMeta(true)
       try {
-        const [catsRes, brandsRes, suppliersRes] = await Promise.all([
+        const [catsRes, brandsRes, suppliersRes, unitsRes] = await Promise.all([
           api.get('/products/categories'),
           api.get('/products/brands'),
-          api.get('/products/suppliers')
+          api.get('/products/suppliers'),
+          api.get('/products/units')
         ])
         setCategories(catsRes)
         setBrands(brandsRes)
         setSuppliers(suppliersRes)
+        setUnits(unitsRes)
       } catch (err) {
         console.error('Erro ao carregar dados:', err)
         toast({ title: 'Erro ao carregar listas', description: err.message, status: 'error', duration: 3000, isClosable: true })
@@ -211,7 +214,13 @@ export default function ProductForm({ product = null, onSubmit = () => {}, onCre
 
             <FormControl isInvalid={!!errors.unit} isRequired>
               <FormLabel>Unidade *</FormLabel>
-              <Input placeholder="un, kg, lt" bg="white" {...register('unit')} />
+              <Select placeholder="Selecione" bg="white" {...register('unit')}>
+                {units.map((unit) => (
+                  <option key={unit.id} value={unit.name}>
+                    {unit.label} ({unit.name})
+                  </option>
+                ))}
+              </Select>
               <FormErrorMessage>{errors.unit?.message}</FormErrorMessage>
             </FormControl>
           </Grid>

@@ -1,0 +1,17 @@
+# Page snapshot
+
+```yaml
+- generic [ref=e3]:
+  - generic [ref=e4]: "[plugin:vite:react-babel] C:\\Apps\\varejix\\src\\pages\\FinancialReports.jsx: Identifier 'VStack' has already been declared. (453:9) 451 | } 452 | > 453 | function VStack({ children, align = 'stretch', spacing = 0, ...props }) { | ^ 454 | return ( 455 | <Box display=\"flex\" flexDirection=\"column\" gap={spacing} alignItems={align} {...props}> 456 | {children}"
+  - generic [ref=e5]: C:/Apps/varejix/src/pages/FinancialReports.jsx:453:9
+  - generic [ref=e6]: at constructor (C:\Apps\varejix\node_modules\@babel\parser\lib\index.js:367:19) at JSXParserMixin.raise (C:\Apps\varejix\node_modules\@babel\parser\lib\index.js:6624:19) at ScopeHandler.checkRedeclarationInScope (C:\Apps\varejix\node_modules\@babel\parser\lib\index.js:1646:19) at ScopeHandler.declareName (C:\Apps\varejix\node_modules\@babel\parser\lib\index.js:1612:12) at JSXParserMixin.registerFunctionStatementId (C:\Apps\varejix\node_modules\@babel\parser\lib\index.js:13542:16) at JSXParserMixin.parseFunction (C:\Apps\varejix\node_modules\@babel\parser\lib\index.js:13526:12) at JSXParserMixin.parseFunctionStatement (C:\Apps\varejix\node_modules\@babel\parser\lib\index.js:13201:17) at JSXParserMixin.parseStatementContent (C:\Apps\varejix\node_modules\@babel\parser\lib\index.js:12867:21) at JSXParserMixin.parseStatementLike (C:\Apps\varejix\node_modules\@babel\parser\lib\index.js:12843:17) at JSXParserMixin.parseModuleItem (C:\Apps\varejix\node_modules\@babel\parser\lib\index.js:12820:17) at JSXParserMixin.parseBlockOrModuleBlockBody (C:\Apps\varejix\node_modules\@babel\parser\lib\index.js:13392:36) at JSXParserMixin.parseBlockBody (C:\Apps\varejix\node_modules\@babel\parser\lib\index.js:13385:10) at JSXParserMixin.parseProgram (C:\Apps\varejix\node_modules\@babel\parser\lib\index.js:12698:10) at JSXParserMixin.parseTopLevel (C:\Apps\varejix\node_modules\@babel\parser\lib\index.js:12688:25) at JSXParserMixin.parse (C:\Apps\varejix\node_modules\@babel\parser\lib\index.js:14568:25) at parse (C:\Apps\varejix\node_modules\@babel\parser\lib\index.js:14602:38) at parser (C:\Apps\varejix\node_modules\@babel\core\lib\parser\index.js:41:34) at parser.next (<anonymous>) at normalizeFile (C:\Apps\varejix\node_modules\@babel\core\lib\transformation\normalize-file.js:64:37) at normalizeFile.next (<anonymous>) at run (C:\Apps\varejix\node_modules\@babel\core\lib\transformation\index.js:22:50) at run.next (<anonymous>) at transform (C:\Apps\varejix\node_modules\@babel\core\lib\transform.js:22:33) at transform.next (<anonymous>) at step (C:\Apps\varejix\node_modules\gensync\index.js:261:32) at C:\Apps\varejix\node_modules\gensync\index.js:273:13 at async.call.result.err.err (C:\Apps\varejix\node_modules\gensync\index.js:223:11) at C:\Apps\varejix\node_modules\gensync\index.js:189:28 at C:\Apps\varejix\node_modules\@babel\core\lib\gensync-utils\async.js:67:7 at C:\Apps\varejix\node_modules\gensync\index.js:113:33 at step (C:\Apps\varejix\node_modules\gensync\index.js:287:14) at C:\Apps\varejix\node_modules\gensync\index.js:273:13 at async.call.result.err.err (C:\Apps\varejix\node_modules\gensync\index.js:223:11
+  - generic [ref=e7]:
+    - text: Click outside, press Esc key, or fix the code to dismiss.
+    - text: You can also disable this overlay by setting
+    - code [ref=e8]: server.hmr.overlay
+    - text: to
+    - code [ref=e9]: "false"
+    - text: in
+    - code [ref=e10]: vite.config.js
+    - text: .
+```

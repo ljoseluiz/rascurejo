@@ -58,6 +58,7 @@ export default function ProductsAdvanced() {
   const [q, setQ] = useState('')
   const [category, setCategory] = useState('')
   const [brand, setBrand] = useState('')
+  const [unit, setUnit] = useState('')
   const [activeFilter, setActiveFilter] = useState('all')
   const [page, setPage] = useState(1)
   const [limit] = useState(10)
@@ -66,6 +67,7 @@ export default function ProductsAdvanced() {
 
   const [categories, setCategories] = useState([])
   const [brands, setBrands] = useState([])
+  const [units, setUnits] = useState([])
   const [selectedProduct, setSelectedProduct] = useState(null)
 
   const { isOpen: isFormOpen, onOpen: onFormOpen, onClose: onFormClose } = useDisclosure()
@@ -74,18 +76,20 @@ export default function ProductsAdvanced() {
   // Carregar lista de produtos
   useEffect(() => {
     loadProducts()
-  }, [q, category, brand, activeFilter, page, limit])
+  }, [q, category, brand, unit, activeFilter, page, limit])
 
   // Carregar categorias e marcas
   useEffect(() => {
     async function loadMetadata() {
       try {
-        const [catsRes, brandsRes] = await Promise.all([
+        const [catsRes, brandsRes, unitsRes] = await Promise.all([
           api.get('/products/categories'),
-          api.get('/products/brands')
+          api.get('/products/brands'),
+          api.get('/products/units')
         ])
         setCategories(catsRes)
         setBrands(brandsRes)
+        setUnits(unitsRes)
       } catch (err) {
         console.error('Erro ao carregar metadados:', err)
       }
@@ -104,6 +108,7 @@ export default function ProductsAdvanced() {
       })
       if (category) params.append('category', category)
       if (brand) params.append('brand', brand)
+      if (unit) params.append('unit', unit)
       if (activeFilter !== 'all') params.append('active', activeFilter === 'active')
 
       const data = await api.get(`/products?${params}`)
@@ -180,7 +185,7 @@ export default function ProductsAdvanced() {
           </Button>
         </HStack>
 
-        <Grid templateColumns={{ base: '1fr', md: '1fr 1fr 1fr 1fr' }} gap={3} w="full">
+        <Grid templateColumns={{ base: '1fr', md: '1fr 1fr 1fr 1fr 1fr' }} gap={3} w="full">
           <Select
             value={category}
             onChange={(e) => {
@@ -206,6 +211,20 @@ export default function ProductsAdvanced() {
           >
             {brands.map(b => (
               <option key={b.id} value={b.name}>{b.name}</option>
+            ))}
+          </Select>
+
+          <Select
+            value={unit}
+            onChange={(e) => {
+              setUnit(e.target.value)
+              setPage(1)
+            }}
+            placeholder="Filtrar por unidade"
+            bg="white"
+          >
+            {units.map(u => (
+              <option key={u.id} value={u.name}>{u.label} ({u.name})</option>
             ))}
           </Select>
 
@@ -269,6 +288,7 @@ export default function ProductsAdvanced() {
                   <Th>Nome</Th>
                   <Th>Categoria</Th>
                   <Th>Marca</Th>
+                  <Th>Unidade</Th>
                   <Th>Preço Venda</Th>
                   <Th>Estoque</Th>
                   <Th>Status</Th>
@@ -282,10 +302,15 @@ export default function ProductsAdvanced() {
                     <Td>{product.name}</Td>
                     <Td>{product.category}</Td>
                     <Td>{product.brand}</Td>
+                    <Td>
+                      <Badge colorScheme="purple">
+                        {product.unit}
+                      </Badge>
+                    </Td>
                     <Td>R$ {(product.prices?.sale || 0).toFixed(2)}</Td>
                     <Td>
                       <Badge colorScheme={product.stock > 10 ? 'green' : product.stock > 0 ? 'yellow' : 'red'}>
-                        {product.stock} un
+                        {product.stock}
                       </Badge>
                     </Td>
                     <Td>
