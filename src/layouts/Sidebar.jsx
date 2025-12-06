@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
-import { Box, VStack, Button, Text, Icon, Flex, IconButton, Divider, Collapse } from '@chakra-ui/react'
+import { Box, VStack, Button, Text, Icon, Flex, IconButton, Divider, Collapse, useColorMode } from '@chakra-ui/react'
 import { Link as RouterLink, useLocation } from 'react-router-dom'
-import { FiHome, FiBox, FiLayers, FiShoppingCart, FiBarChart2, FiSettings, FiX, FiChevronDown, FiChevronRight, FiList, FiPlus, FiPackage, FiTrendingUp, FiFileText, FiDollarSign } from 'react-icons/fi'
+import { FiHome, FiBox, FiLayers, FiShoppingCart, FiBarChart2, FiSettings, FiX, FiChevronDown, FiChevronRight, FiList, FiPlus, FiPackage, FiTrendingUp, FiFileText, FiDollarSign, FiShoppingBag } from 'react-icons/fi'
 
 const links = [
   { to: '/', label: 'Dashboard', icon: FiHome },
@@ -23,7 +23,14 @@ const links = [
     ]
   },
   { to: '/inventory', label: 'Inventário', icon: FiLayers },
-  { to: '/sales', label: 'Vendas', icon: FiShoppingCart },
+  { 
+    label: 'Vendas', 
+    icon: FiShoppingCart,
+    submenu: [
+      { to: '/sales/pos', label: 'PDV (Ponto de Venda)', icon: FiShoppingBag },
+      { to: '/sales', label: 'Gerenciar Vendas', icon: FiList }
+    ]
+  },
   {
     label: 'Financeiro',
     icon: FiDollarSign,
@@ -42,7 +49,8 @@ const links = [
 
 export default function Sidebar({ isOpen, onClose }) {
   const location = useLocation()
-  const [expandedMenus, setExpandedMenus] = useState({ Produtos: true, Estoque: true, Financeiro: false })
+  const { colorMode } = useColorMode()
+  const [expandedMenus, setExpandedMenus] = useState({ Produtos: true, Estoque: true, Vendas: false, Financeiro: false })
 
   const isActive = (path) => location.pathname === path
   
@@ -57,9 +65,9 @@ export default function Sidebar({ isOpen, onClose }) {
   return (
     <Box
       as="aside"
-      bg="gray.50"
+      bg={colorMode === 'dark' ? 'gray.800' : 'gray.50'}
       borderRight="1px solid"
-      borderColor="gray.200"
+      borderColor={colorMode === 'dark' ? 'gray.700' : 'gray.200'}
       boxShadow="sm"
       width="240px"
       minH="100vh"
@@ -68,7 +76,9 @@ export default function Sidebar({ isOpen, onClose }) {
       top="0"
     >
       <Flex align="center" justify="space-between" p={4}>
-        <Text fontWeight="bold">Menu</Text>
+        <Text fontWeight="bold" color={colorMode === 'dark' ? 'white' : 'gray.800'}>
+          Menu
+        </Text>
         <IconButton
           aria-label="Fechar menu"
           icon={<FiX />}

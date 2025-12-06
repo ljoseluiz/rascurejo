@@ -10,6 +10,8 @@ import StockMovements from '../pages/StockMovements'
 import StockLevels from '../pages/StockLevels'
 import StockReports from '../pages/StockReports'
 import Sales from '../pages/Sales'
+import PointOfSale from '../pages/PointOfSale'
+import SalesManagement from '../pages/SalesManagement'
 import Reports from '../pages/Reports'
 import Settings from '../pages/Settings'
 import AccountsPayable from '../pages/AccountsPayable'
@@ -35,7 +37,8 @@ export default function AppRoutes() {
       <Route path="/stock/movements" element={<RequireAuth><StockMovements /></RequireAuth>} />
       <Route path="/stock/levels" element={<RequireAuth><StockLevels /></RequireAuth>} />
       <Route path="/stock/reports" element={<RequireAuth><StockReports /></RequireAuth>} />
-      <Route path="/sales" element={<RequireAuth><Sales /></RequireAuth>} />
+      <Route path="/sales" element={<RequireAuth><SalesManagement /></RequireAuth>} />
+      <Route path="/sales/pos" element={<RequireAuth><PointOfSale /></RequireAuth>} />
       <Route path="/reports" element={<RequireAuth><Reports /></RequireAuth>} />
       <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
       <Route path="/financial" element={<RequireAuth><FinancialDashboard /></RequireAuth>} />

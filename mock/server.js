@@ -73,6 +73,104 @@ let accountsReceivable = Array.isArray(db.accounts_receivable) ? db.accounts_rec
 let cashBoxes = Array.isArray(db.cash_boxes) ? db.cash_boxes.slice() : []
 let cashMovements = Array.isArray(db.cash_movements) ? db.cash_movements.slice() : []
 let cashFlowForecast = Array.isArray(db.cash_flow_forecast) ? db.cash_flow_forecast.slice() : []
+let sales = Array.isArray(db.sales) ? db.sales.slice() : []
+let salesItems = Array.isArray(db.sales_items) ? db.sales_items.slice() : []
+let sellers = Array.isArray(db.sellers) ? db.sellers.slice() : [
+  { id: 1, name: 'Admin', username: 'admin', active: true, commission: 5.0 },
+  { id: 2, name: 'Vendedor 1', username: 'seller1', active: true, commission: 3.0 },
+  { id: 3, name: 'Vendedor 2', username: 'seller2', active: true, commission: 3.0 },
+]
+
+// Adicionar vendas de exemplo se não houver
+if (sales.length === 0) {
+  const today = new Date().toISOString()
+  sales = [
+    {
+      id: 1,
+      date: today,
+      customer_name: 'João Silva',
+      customer_cpf: '123.456.789-00',
+      seller_id: 1,
+      seller_name: 'Admin',
+      channel: 'presencial',
+      payment_method: 'dinheiro',
+      subtotal: 150.00,
+      discount: 10.00,
+      tax: 11.20,
+      total: 151.20,
+      status: 'completed',
+      notes: 'Venda teste',
+      created_at: today,
+      created_by: 'admin',
+    },
+    {
+      id: 2,
+      date: today,
+      customer_name: 'Maria Santos',
+      customer_cpf: '987.654.321-00',
+      seller_id: 2,
+      seller_name: 'Vendedor 1',
+      channel: 'online',
+      payment_method: 'cartao_credito',
+      subtotal: 299.90,
+      discount: 0,
+      tax: 23.99,
+      total: 323.89,
+      status: 'completed',
+      notes: '',
+      created_at: today,
+      created_by: 'seller1',
+    },
+    {
+      id: 3,
+      date: new Date(Date.now() - 86400000).toISOString(), // ontem
+      customer_name: 'Pedro Costa',
+      customer_cpf: null,
+      seller_id: 1,
+      seller_name: 'Admin',
+      channel: 'presencial',
+      payment_method: 'pix',
+      subtotal: 89.90,
+      discount: 5.00,
+      tax: 6.79,
+      total: 91.69,
+      status: 'completed',
+      notes: '',
+      created_at: new Date(Date.now() - 86400000).toISOString(),
+      created_by: 'admin',
+    },
+    {
+      id: 4,
+      date: new Date(Date.now() - 172800000).toISOString(), // 2 dias atrás
+      customer_name: 'Ana Lima',
+      customer_cpf: '111.222.333-44',
+      seller_id: 3,
+      seller_name: 'Vendedor 2',
+      channel: 'online',
+      payment_method: 'boleto',
+      subtotal: 450.00,
+      discount: 50.00,
+      tax: 32.00,
+      total: 432.00,
+      status: 'cancelled',
+      notes: 'Cliente desistiu',
+      created_at: new Date(Date.now() - 172800000).toISOString(),
+      created_by: 'seller2',
+      cancelled_at: new Date(Date.now() - 172800000 + 3600000).toISOString(),
+      cancelled_by: 'admin',
+    },
+  ]
+  
+  salesItems = [
+    { id: 1, sale_id: 1, product_id: 1, product_name: 'Camiseta Básica Branca', quantity: 3, unit_price: 29.90, total: 89.70 },
+    { id: 2, sale_id: 1, product_id: 2, product_name: 'Calça Jeans Slim', quantity: 1, unit_price: 59.90, total: 59.90 },
+    { id: 3, sale_id: 2, product_id: 3, product_name: 'Tênis Esportivo', quantity: 1, unit_price: 299.90, total: 299.90 },
+    { id: 4, sale_id: 3, product_id: 1, product_name: 'Camiseta Básica Branca', quantity: 2, unit_price: 29.90, total: 59.80 },
+    { id: 5, sale_id: 3, product_id: 4, product_name: 'Boné Aba Reta', quantity: 1, unit_price: 29.90, total: 29.90 },
+    { id: 6, sale_id: 4, product_id: 5, product_name: 'Jaqueta de Couro', quantity: 1, unit_price: 450.00, total: 450.00 },
+  ]
+}
+
 
 // Debug middleware
 app.use((req, res, next) => {
@@ -2026,6 +2124,305 @@ app.get('/financial/reports/by-product', (req, res) => {
   })).sort((a, b) => b.totalValue - a.totalValue)
   
   res.json({ items: productStats.slice(0, limit) })
+})
+
+// ============================================
+// VENDAS - SALES MODULE
+// ============================================
+
+// GET /sellers - Listar vendedores
+app.get('/sellers', ensureAuth, (req, res) => {
+  const active = req.query.active !== undefined ? req.query.active === 'true' : null
+  let filtered = sellers.slice()
+  
+  if (active !== null) {
+    filtered = filtered.filter(s => s.active === active)
+  }
+  
+  res.json({ items: filtered })
+})
+
+// GET /sales/stats - Estatísticas de vendas
+app.get('/sales/stats', ensureAuth, (req, res) => {
+  const today = new Date().toISOString().split('T')[0]
+  const todaySales = sales.filter(s => s.date.startsWith(today) && s.status === 'completed')
+  const totalSales = sales.filter(s => s.status === 'completed')
+  const cancelledSales = sales.filter(s => s.status === 'cancelled')
+  
+  const todayRevenue = todaySales.reduce((sum, s) => sum + s.total, 0)
+  const totalRevenue = totalSales.reduce((sum, s) => sum + s.total, 0)
+  const avgTicket = totalSales.length > 0 ? totalRevenue / totalSales.length : 0
+  
+  // Top vendedores
+  const sellerStats = {}
+  totalSales.forEach(sale => {
+    if (!sellerStats[sale.seller_id]) {
+      sellerStats[sale.seller_id] = {
+        seller_id: sale.seller_id,
+        seller_name: sale.seller_name,
+        total_sales: 0,
+        total_revenue: 0,
+      }
+    }
+    sellerStats[sale.seller_id].total_sales++
+    sellerStats[sale.seller_id].total_revenue += sale.total
+  })
+  
+  const topSellers = Object.values(sellerStats).sort((a, b) => b.total_revenue - a.total_revenue).slice(0, 5)
+  
+  res.json({
+    today_sales: todaySales.length,
+    today_revenue: todayRevenue,
+    total_sales: totalSales.length,
+    total_revenue: totalRevenue,
+    cancelled_sales: cancelledSales.length,
+    avg_ticket: avgTicket,
+    top_sellers: topSellers,
+  })
+})
+
+// GET /sales - Listar vendas com filtros
+app.get('/sales', ensureAuth, (req, res) => {
+  const status = req.query.status || 'all'
+  const startDate = req.query.startDate
+  const endDate = req.query.endDate
+  const seller = req.query.seller
+  const channel = req.query.channel // presencial, online
+  const page = Math.max(1, parseInt(req.query.page || '1', 10))
+  const limit = Math.max(1, parseInt(req.query.limit || '20', 10))
+  
+  let filtered = sales.slice()
+  
+  // Filtrar por status
+  if (status !== 'all') {
+    filtered = filtered.filter(s => s.status === status)
+  }
+  
+  // Filtrar por data
+  if (startDate) {
+    filtered = filtered.filter(s => s.date >= startDate)
+  }
+  if (endDate) {
+    filtered = filtered.filter(s => s.date <= endDate)
+  }
+  
+  // Filtrar por vendedor
+  if (seller) {
+    filtered = filtered.filter(s => s.seller_id === parseInt(seller))
+  }
+  
+  // Filtrar por canal
+  if (channel) {
+    filtered = filtered.filter(s => s.channel === channel)
+  }
+  
+  // Ordenar por data decrescente
+  filtered.sort((a, b) => new Date(b.date) - new Date(a.date))
+  
+  const total = filtered.length
+  const start = (page - 1) * limit
+  const items = filtered.slice(start, start + limit)
+  
+  res.json({ items, total, page, limit })
+})
+
+// GET /sales/:id - Detalhes da venda
+app.get('/sales/:id', ensureAuth, (req, res) => {
+  const id = parseInt(req.params.id, 10)
+  const sale = sales.find(s => s.id === id)
+  if (!sale) return res.status(404).json({ error: 'Venda não encontrada' })
+  
+  // Buscar itens da venda
+  const items = salesItems.filter(item => item.sale_id === id)
+  
+  res.json({ ...sale, items })
+})
+
+// POST /sales - Criar nova venda (PDV)
+app.post('/sales', ensureAuth, verifyCsrf, (req, res) => {
+  const body = req.body || {}
+  const { customer_name, customer_cpf, seller_id, channel, payment_method, items, discount, notes } = body
+  
+  if (!items || items.length === 0) {
+    return res.status(400).json({ error: 'Venda deve conter ao menos 1 item' })
+  }
+  
+  // Calcular totais
+  let subtotal = 0
+  const saleItems = []
+  
+  for (const item of items) {
+    const product = products.find(p => p.id === item.product_id)
+    if (!product) {
+      return res.status(404).json({ error: `Produto ${item.product_id} não encontrado` })
+    }
+    
+    // Verificar estoque
+    if (product.stock < item.quantity) {
+      return res.status(400).json({ error: `Estoque insuficiente para ${product.name}` })
+    }
+    
+    const unitPrice = product.prices?.sale || 0
+    const itemTotal = unitPrice * item.quantity
+    subtotal += itemTotal
+    
+    saleItems.push({
+      id: salesItems.length + saleItems.length + 1,
+      sale_id: sales.length + 1,
+      product_id: item.product_id,
+      product_name: product.name,
+      quantity: item.quantity,
+      unit_price: unitPrice,
+      total: itemTotal,
+    })
+  }
+  
+  const discountAmount = discount || 0
+  const total = subtotal - discountAmount
+  
+  // Calcular impostos simplificado (exemplo: 8%)
+  const tax = total * 0.08
+  const totalWithTax = total + tax
+  
+  // Criar venda
+  const newSale = {
+    id: sales.length + 1,
+    date: new Date().toISOString(),
+    customer_name: customer_name || 'Cliente Avulso',
+    customer_cpf: customer_cpf || null,
+    seller_id: seller_id || 1,
+    seller_name: sellers.find(s => s.id === seller_id)?.name || 'Admin',
+    channel: channel || 'presencial',
+    payment_method: payment_method || 'dinheiro',
+    subtotal,
+    discount: discountAmount,
+    tax,
+    total: totalWithTax,
+    status: 'completed',
+    notes: notes || '',
+    created_at: new Date().toISOString(),
+    created_by: req.user?.username || 'admin',
+  }
+  
+  sales.push(newSale)
+  
+  // Adicionar itens
+  saleItems.forEach(item => salesItems.push(item))
+  
+  // Baixar estoque automaticamente
+  for (const item of items) {
+    const product = products.find(p => p.id === item.product_id)
+    if (product) {
+      product.stock -= item.quantity
+      
+      // Registrar movimento de estoque
+      if (stockMovements) {
+        stockMovements.push({
+          id: stockMovements.length + 1,
+          product_id: item.product_id,
+          location_id: 1,
+          type: 'exit',
+          quantity: item.quantity,
+          reason: 'sale',
+          reference: `Venda #${newSale.id}`,
+          date: new Date().toISOString(),
+          user: req.user?.username || 'admin',
+        })
+      }
+    }
+  }
+  
+  res.status(201).json({ ...newSale, items: saleItems })
+})
+
+// PUT /sales/:id/cancel - Cancelar venda
+app.put('/sales/:id/cancel', ensureAuth, verifyCsrf, (req, res) => {
+  const id = parseInt(req.params.id, 10)
+  const sale = sales.find(s => s.id === id)
+  if (!sale) return res.status(404).json({ error: 'Venda não encontrada' })
+  
+  if (sale.status === 'cancelled') {
+    return res.status(400).json({ error: 'Venda já cancelada' })
+  }
+  
+  // Cancelar venda
+  sale.status = 'cancelled'
+  sale.cancelled_at = new Date().toISOString()
+  sale.cancelled_by = req.user?.username || 'admin'
+  
+  // Devolver estoque
+  const items = salesItems.filter(item => item.sale_id === id)
+  for (const item of items) {
+    const product = products.find(p => p.id === item.product_id)
+    if (product) {
+      product.stock += item.quantity
+      
+      // Registrar movimento de estoque
+      if (stockMovements) {
+        stockMovements.push({
+          id: stockMovements.length + 1,
+          product_id: item.product_id,
+          location_id: 1,
+          type: 'entry',
+          quantity: item.quantity,
+          reason: 'return',
+          reference: `Cancelamento Venda #${id}`,
+          date: new Date().toISOString(),
+          user: req.user?.username || 'admin',
+        })
+      }
+    }
+  }
+  
+  res.json(sale)
+})
+
+// POST /sales/:id/return - Devolução total ou parcial
+app.post('/sales/:id/return', ensureAuth, verifyCsrf, (req, res) => {
+  const id = parseInt(req.params.id, 10)
+  const sale = sales.find(s => s.id === id)
+  if (!sale) return res.status(404).json({ error: 'Venda não encontrada' })
+  
+  const { items: returnItems, reason } = req.body
+  
+  if (!returnItems || returnItems.length === 0) {
+    return res.status(400).json({ error: 'Informe os itens para devolução' })
+  }
+  
+  // Processar devolução
+  for (const retItem of returnItems) {
+    const saleItem = salesItems.find(si => si.sale_id === id && si.product_id === retItem.product_id)
+    if (!saleItem) continue
+    
+    const returnQty = Math.min(retItem.quantity, saleItem.quantity)
+    
+    // Devolver ao estoque
+    const product = products.find(p => p.id === retItem.product_id)
+    if (product) {
+      product.stock += returnQty
+      
+      // Registrar movimento de estoque
+      if (stockMovements) {
+        stockMovements.push({
+          id: stockMovements.length + 1,
+          product_id: retItem.product_id,
+          location_id: 1,
+          type: 'entry',
+          quantity: returnQty,
+          reason: 'return',
+          reference: `Devolução Venda #${id} - ${reason || 'Não informado'}`,
+          date: new Date().toISOString(),
+          user: req.user?.username || 'admin',
+        })
+      }
+    }
+  }
+  
+  sale.status = 'returned'
+  sale.returned_at = new Date().toISOString()
+  sale.return_reason = reason || 'Não informado'
+  
+  res.json(sale)
 })
 
 app.listen(PORT, () => {
