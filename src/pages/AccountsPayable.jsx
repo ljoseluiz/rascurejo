@@ -34,6 +34,11 @@ import {
   StatNumber,
   FormControl,
   FormLabel,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanels,
+  TabPanel,
 } from '@chakra-ui/react'
 import { useAuth } from '../context/AuthContext'
 import api from '../services/api'
@@ -64,6 +69,7 @@ export default function AccountsPayable() {
   const [summary, setSummary] = useState({})
   const [selectedPayable, setSelectedPayable] = useState(null)
   const [suppliers, setSuppliers] = useState([])
+  const [activeTab, setActiveTab] = useState(0)
   const [formData, setFormData] = useState({
     supplier_id: '',
     invoice_number: '',
@@ -204,6 +210,36 @@ export default function AccountsPayable() {
 
   const pageCount = Math.ceil(total / 10)
 
+  // Agrupar por fornecedor
+  const payablesBySupplier = () => {
+    const grouped = {}
+    payables.forEach((p) => {
+      if (!grouped[p.supplier_name]) {
+        grouped[p.supplier_name] = []
+      }
+      grouped[p.supplier_name].push(p)
+    })
+    return grouped
+  }
+
+  // Agenda de pagamentos (próximos 30 dias)
+  const paymentSchedule = () => {
+    return payables
+      .filter(p => p.status !== 'paid')
+      .sort((a, b) => new Date(a.due_date) - new Date(b.due_date))
+      .slice(0, 20)
+  }
+
+  // Situação dos títulos
+  const titlesStatus = () => {
+    const byStatus = {
+      pending: payables.filter(p => p.status === 'pending'),
+      overdue: payables.filter(p => p.status === 'overdue'),
+      paid: payables.filter(p => p.status === 'paid'),
+    }
+    return byStatus
+  }
+
   return (
     <Box p={6}>
       <Stack spacing={6}>
@@ -271,111 +307,411 @@ export default function AccountsPayable() {
           </Card>
         </SimpleGrid>
 
-        {/* Filters */}
-        <HStack spacing={4}>
-          <Select
-            placeholder="Filtrar por status"
-            value={status}
-            onChange={(e) => {
-              setStatus(e.target.value)
-              setPage(1)
-            }}
-            maxW="200px"
-          >
-            <option value="pending">Pendente</option>
-            <option value="overdue">Vencido</option>
-            <option value="paid">Pago</option>
-          </Select>
-        </HStack>
+        {/* Abas */}
+        <Tabs index={activeTab} onChange={setActiveTab}>
+          <TabList>
+            <Tab>Listagem</Tab>
+            <Tab>Fornecedores</Tab>
+            <Tab>Faturas e Boletos</Tab>
+            <Tab>Agenda de Pagamentos</Tab>
+            <Tab>Situação dos Títulos</Tab>
+          </TabList>
 
-        {/* Table */}
-        <Box overflowX="auto">
-          <Table variant="striped">
-            <Thead>
-              <Tr>
-                <Th>Fornecedor</Th>
-                <Th>NF</Th>
-                <Th>Valor</Th>
-                <Th>Vencimento</Th>
-                <Th>Status</Th>
-                <Th>Ações</Th>
-              </Tr>
-            </Thead>
-            <Tbody>
-              {loading ? (
-                <Tr>
-                  <Td colSpan={6} textAlign="center">
-                    Carregando...
-                  </Td>
-                </Tr>
-              ) : payables.length === 0 ? (
-                <Tr>
-                  <Td colSpan={6} textAlign="center">
-                    Nenhuma conta encontrada
-                  </Td>
-                </Tr>
-              ) : (
-                payables.map((payable) => (
-                  <Tr key={payable.id}>
-                    <Td>{payable.supplier_name}</Td>
-                    <Td>{payable.invoice_number}</Td>
-                    <Td>
-                      {payable.amount.toLocaleString('pt-BR', {
-                        style: 'currency',
-                        currency: 'BRL',
-                      })}
-                    </Td>
-                    <Td>{payable.due_date}</Td>
-                    <Td>
-                      <Badge colorScheme={statusColors[payable.status]}>
-                        {statusLabels[payable.status]}
-                      </Badge>
-                    </Td>
-                    <Td>
-                      <ButtonGroup size="sm" spacing={2}>
-                        {payable.status !== 'paid' && (
-                          <Button
-                            colorScheme="green"
-                            onClick={() => {
-                              setSelectedPayable(payable)
-                              onOpen()
-                            }}
+          <TabPanels>
+            {/* ABA 1: Listagem */}
+            <TabPanel>
+              <Stack spacing={4}>
+                <HStack spacing={4}>
+                  <Select
+                    placeholder="Filtrar por status"
+                    value={status}
+                    onChange={(e) => {
+                      setStatus(e.target.value)
+                      setPage(1)
+                    }}
+                    maxW="200px"
+                  >
+                    <option value="pending">Pendente</option>
+                    <option value="overdue">Vencido</option>
+                    <option value="paid">Pago</option>
+                  </Select>
+                </HStack>
+
+                <Box overflowX="auto">
+                  <Table variant="striped">
+                    <Thead>
+                      <Tr>
+                        <Th>Fornecedor</Th>
+                        <Th>NF</Th>
+                        <Th>Valor</Th>
+                        <Th>Vencimento</Th>
+                        <Th>Status</Th>
+                        <Th>Ações</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {loading ? (
+                        <Tr>
+                          <Td colSpan={6} textAlign="center">
+                            Carregando...
+                          </Td>
+                        </Tr>
+                      ) : payables.length === 0 ? (
+                        <Tr>
+                          <Td colSpan={6} textAlign="center">
+                            Nenhuma conta encontrada
+                          </Td>
+                        </Tr>
+                      ) : (
+                        payables.map((payable) => (
+                          <Tr key={payable.id}>
+                            <Td>{payable.supplier_name}</Td>
+                            <Td>{payable.invoice_number}</Td>
+                            <Td>
+                              {payable.amount.toLocaleString('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
+                              })}
+                            </Td>
+                            <Td>{payable.due_date}</Td>
+                            <Td>
+                              <Badge colorScheme={statusColors[payable.status]}>
+                                {statusLabels[payable.status]}
+                              </Badge>
+                            </Td>
+                            <Td>
+                              <ButtonGroup size="sm" spacing={2}>
+                                {payable.status !== 'paid' && (
+                                  <Button
+                                    colorScheme="green"
+                                    onClick={() => {
+                                      setSelectedPayable(payable)
+                                      onOpen()
+                                    }}
+                                  >
+                                    Marcar Pago
+                                  </Button>
+                                )}
+                              </ButtonGroup>
+                            </Td>
+                          </Tr>
+                        ))
+                      )}
+                    </Tbody>
+                  </Table>
+                </Box>
+
+                {/* Paginação */}
+                {pageCount > 1 && (
+                  <HStack justify="center" spacing={4}>
+                    <Button
+                      onClick={() => setPage(Math.max(1, page - 1))}
+                      isDisabled={page === 1}
+                    >
+                      Anterior
+                    </Button>
+                    <Text>
+                      Página {page} de {pageCount}
+                    </Text>
+                    <Button
+                      onClick={() => setPage(Math.min(pageCount, page + 1))}
+                      isDisabled={page === pageCount}
+                    >
+                      Próxima
+                    </Button>
+                  </HStack>
+                )}
+              </Stack>
+            </TabPanel>
+
+            {/* ABA 2: Fornecedores */}
+            <TabPanel>
+              <Box overflowX="auto">
+                <Table variant="striped">
+                  <Thead>
+                    <Tr>
+                      <Th>Fornecedor</Th>
+                      <Th>Documentos</Th>
+                      <Th>Total Devido</Th>
+                      <Th>Pendente</Th>
+                      <Th>Vencido</Th>
+                      <Th>Pago</Th>
+                    </Tr>
+                  </Thead>
+                  <Tbody>
+                    {Object.entries(payablesBySupplier()).map(([supplier, items]) => {
+                      const total = items.reduce((sum, p) => sum + p.amount, 0)
+                      const pending = items
+                        .filter(p => p.status === 'pending')
+                        .reduce((sum, p) => sum + p.amount, 0)
+                      const overdue = items
+                        .filter(p => p.status === 'overdue')
+                        .reduce((sum, p) => sum + p.amount, 0)
+                      const paid = items
+                        .filter(p => p.status === 'paid')
+                        .reduce((sum, p) => sum + p.amount, 0)
+
+                      return (
+                        <Tr key={supplier}>
+                          <Td fontWeight="bold">{supplier}</Td>
+                          <Td>{items.length}</Td>
+                          <Td>{total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</Td>
+                          <Td color="orange.600">{pending.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</Td>
+                          <Td color="red.600">{overdue.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</Td>
+                          <Td color="green.600">{paid.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</Td>
+                        </Tr>
+                      )
+                    })}
+                  </Tbody>
+                </Table>
+              </Box>
+            </TabPanel>
+
+            {/* ABA 3: Faturas e Boletos */}
+            <TabPanel>
+              <Stack spacing={4}>
+                <Box overflowX="auto">
+                  <Table variant="striped" size="sm">
+                    <Thead>
+                      <Tr>
+                        <Th>Fornecedor</Th>
+                        <Th>NF/Boleto</Th>
+                        <Th>Valor</Th>
+                        <Th>Descrição</Th>
+                        <Th>Método</Th>
+                        <Th>Status</Th>
+                        <Th>Ação</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {payables.map((payable) => (
+                        <Tr key={payable.id}>
+                          <Td fontSize="sm">{payable.supplier_name}</Td>
+                          <Td fontSize="sm" fontWeight="bold">
+                            {payable.invoice_number}
+                          </Td>
+                          <Td fontSize="sm">
+                            {payable.amount.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                          </Td>
+                          <Td fontSize="sm">{payable.description || '-'}</Td>
+                          <Td fontSize="sm">
+                            <Badge colorScheme="blue" fontSize="xs">
+                              {payable.payment_method === 'boleto' && '📄 Boleto'}
+                              {payable.payment_method === 'transfer' && '🏦 Transferência'}
+                              {payable.payment_method === 'check' && '📋 Cheque'}
+                              {payable.payment_method === 'cash' && '💵 Dinheiro'}
+                            </Badge>
+                          </Td>
+                          <Td>
+                            <Badge colorScheme={statusColors[payable.status]}>
+                              {statusLabels[payable.status]}
+                            </Badge>
+                          </Td>
+                          <Td>
+                            {payable.status !== 'paid' && (
+                              <Button
+                                size="xs"
+                                colorScheme="green"
+                                onClick={() => {
+                                  setSelectedPayable(payable)
+                                  onOpen()
+                                }}
+                              >
+                                Pagar
+                              </Button>
+                            )}
+                          </Td>
+                        </Tr>
+                      ))}
+                    </Tbody>
+                  </Table>
+                </Box>
+              </Stack>
+            </TabPanel>
+
+            {/* ABA 4: Agenda de Pagamentos */}
+            <TabPanel>
+              <Stack spacing={4}>
+                <Heading size="sm">Próximos Pagamentos (30 dias)</Heading>
+                <Box overflowX="auto">
+                  <Table variant="striped" size="sm">
+                    <Thead>
+                      <Tr>
+                        <Th>Data Vencimento</Th>
+                        <Th>Fornecedor</Th>
+                        <Th>NF</Th>
+                        <Th>Valor</Th>
+                        <Th>Dias para Vencer</Th>
+                        <Th>Status</Th>
+                      </Tr>
+                    </Thead>
+                    <Tbody>
+                      {paymentSchedule().map((payable) => {
+                        const today = new Date()
+                        const dueDate = new Date(payable.due_date)
+                        const daysToVencimento = Math.ceil(
+                          (dueDate - today) / (1000 * 60 * 60 * 24)
+                        )
+                        const isOverdue = daysToVencimento < 0
+                        const isUrgent = daysToVencimento <= 5 && daysToVencimento >= 0
+
+                        return (
+                          <Tr
+                            key={payable.id}
+                            bg={isOverdue ? 'red.50' : isUrgent ? 'yellow.50' : 'transparent'}
                           >
-                            Marcar Pago
-                          </Button>
-                        )}
-                        <Button colorScheme="blue">Detalhes</Button>
-                      </ButtonGroup>
-                    </Td>
-                  </Tr>
-                ))
-              )}
-            </Tbody>
-          </Table>
-        </Box>
+                            <Td fontWeight="bold">{payable.due_date}</Td>
+                            <Td>{payable.supplier_name}</Td>
+                            <Td>{payable.invoice_number}</Td>
+                            <Td fontWeight="bold">
+                              {payable.amount.toLocaleString('pt-BR', {
+                                style: 'currency',
+                                currency: 'BRL',
+                              })}
+                            </Td>
+                            <Td>
+                              <Badge
+                                colorScheme={
+                                  isOverdue ? 'red' : isUrgent ? 'orange' : 'green'
+                                }
+                              >
+                                {isOverdue ? `Vencido há ${Math.abs(daysToVencimento)}d` : `${daysToVencimento}d`}
+                              </Badge>
+                            </Td>
+                            <Td>
+                              <Badge colorScheme={statusColors[payable.status]}>
+                                {statusLabels[payable.status]}
+                              </Badge>
+                            </Td>
+                          </Tr>
+                        )
+                      })}
+                    </Tbody>
+                  </Table>
+                </Box>
+              </Stack>
+            </TabPanel>
 
-        {/* Pagination */}
-        {pageCount > 1 && (
-          <HStack justify="center" spacing={2}>
-            <Button
-              isDisabled={page === 1}
-              onClick={() => setPage(page - 1)}
-              size="sm"
-            >
-              Anterior
-            </Button>
-            <Text fontSize="sm">
-              Página {page} de {pageCount}
-            </Text>
-            <Button
-              isDisabled={page === pageCount}
-              onClick={() => setPage(page + 1)}
-              size="sm"
-            >
-              Próxima
-            </Button>
-          </HStack>
-        )}
+            {/* ABA 5: Situação dos Títulos */}
+            <TabPanel>
+              <Stack spacing={6}>
+                {/* Pendentes */}
+                <Box>
+                  <Heading size="sm" mb={4}>
+                    📋 Pendente ({titlesStatus().pending.length})
+                  </Heading>
+                  {titlesStatus().pending.length === 0 ? (
+                    <Text color="gray.500">Nenhum título pendente</Text>
+                  ) : (
+                    <Box overflowX="auto">
+                      <Table variant="striped" size="sm">
+                        <Thead>
+                          <Tr bg="yellow.50">
+                            <Th>Fornecedor</Th>
+                            <Th>NF</Th>
+                            <Th>Valor</Th>
+                            <Th>Vencimento</Th>
+                          </Tr>
+                        </Thead>
+                        <Tbody>
+                          {titlesStatus().pending.map((p) => (
+                            <Tr key={p.id}>
+                              <Td>{p.supplier_name}</Td>
+                              <Td>{p.invoice_number}</Td>
+                              <Td>
+                                {p.amount.toLocaleString('pt-BR', {
+                                  style: 'currency',
+                                  currency: 'BRL',
+                                })}
+                              </Td>
+                              <Td>{p.due_date}</Td>
+                            </Tr>
+                          ))}
+                        </Tbody>
+                      </Table>
+                    </Box>
+                  )}
+                </Box>
+
+                {/* Vencidos */}
+                <Box>
+                  <Heading size="sm" mb={4}>
+                    🔴 Vencido ({titlesStatus().overdue.length})
+                  </Heading>
+                  {titlesStatus().overdue.length === 0 ? (
+                    <Text color="gray.500">Nenhum título vencido</Text>
+                  ) : (
+                    <Box overflowX="auto">
+                      <Table variant="striped" size="sm">
+                        <Thead>
+                          <Tr bg="red.50">
+                            <Th>Fornecedor</Th>
+                            <Th>NF</Th>
+                            <Th>Valor</Th>
+                            <Th>Vencimento</Th>
+                          </Tr>
+                        </Thead>
+                        <Tbody>
+                          {titlesStatus().overdue.map((p) => (
+                            <Tr key={p.id}>
+                              <Td>{p.supplier_name}</Td>
+                              <Td>{p.invoice_number}</Td>
+                              <Td fontWeight="bold">
+                                {p.amount.toLocaleString('pt-BR', {
+                                  style: 'currency',
+                                  currency: 'BRL',
+                                })}
+                              </Td>
+                              <Td>{p.due_date}</Td>
+                            </Tr>
+                          ))}
+                        </Tbody>
+                      </Table>
+                    </Box>
+                  )}
+                </Box>
+
+                {/* Pagos */}
+                <Box>
+                  <Heading size="sm" mb={4}>
+                    ✅ Pago ({titlesStatus().paid.length})
+                  </Heading>
+                  {titlesStatus().paid.length === 0 ? (
+                    <Text color="gray.500">Nenhum título pago</Text>
+                  ) : (
+                    <Box overflowX="auto">
+                      <Table variant="striped" size="sm">
+                        <Thead>
+                          <Tr bg="green.50">
+                            <Th>Fornecedor</Th>
+                            <Th>NF</Th>
+                            <Th>Valor</Th>
+                            <Th>Vencimento</Th>
+                          </Tr>
+                        </Thead>
+                        <Tbody>
+                          {titlesStatus().paid.map((p) => (
+                            <Tr key={p.id}>
+                              <Td>{p.supplier_name}</Td>
+                              <Td>{p.invoice_number}</Td>
+                              <Td>
+                                {p.amount.toLocaleString('pt-BR', {
+                                  style: 'currency',
+                                  currency: 'BRL',
+                                })}
+                              </Td>
+                              <Td>{p.due_date}</Td>
+                            </Tr>
+                          ))}
+                        </Tbody>
+                      </Table>
+                    </Box>
+                  )}
+                </Box>
+              </Stack>
+            </TabPanel>
+          </TabPanels>
+        </Tabs>
       </Stack>
 
       {/* Mark as Paid Modal */}
