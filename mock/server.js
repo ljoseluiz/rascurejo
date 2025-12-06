@@ -1,10 +1,17 @@
-const express = require('express')
-const cors = require('cors')
-const bodyParser = require('body-parser')
-const cookieParser = require('cookie-parser')
-const jwt = require('jsonwebtoken')
-const session = require('express-session')
-const MemoryStore = require('memorystore')(session)
+import express from 'express'
+import cors from 'cors'
+import bodyParser from 'body-parser'
+import cookieParser from 'cookie-parser'
+import jwt from 'jsonwebtoken'
+import session from 'express-session'
+import memorystore from 'memorystore'
+import { readFileSync } from 'fs'
+import { fileURLToPath } from 'url'
+import { dirname, join } from 'path'
+
+const MemoryStore = memorystore(session)
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
 
 const app = express()
 const PORT = process.env.PORT || 3000
@@ -50,7 +57,8 @@ const users = [
 ]
 
 // load initial data from db.json
-const db = require('../db.json')
+const dbPath = join(__dirname, '..', 'db.json')
+const db = JSON.parse(readFileSync(dbPath, 'utf-8'))
 let products = Array.isArray(db.products) ? db.products.slice() : []
 let categories = Array.isArray(db.categories) ? db.categories.slice() : []
 let brands = Array.isArray(db.brands) ? db.brands.slice() : []
