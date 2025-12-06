@@ -40,17 +40,20 @@ import {
 import { FiSearch, FiPlus, FiMinus, FiTrash2, FiShoppingCart } from 'react-icons/fi'
 import { useAuth } from '../context/AuthContext'
 import api from '../services/api'
+import PixPayment from '../components/PixPayment'
 
 export default function PointOfSale() {
   const auth = useAuth()
   const toast = useToast()
   const { isOpen, onOpen, onClose } = useDisclosure()
+  const { isOpen: isPixOpen, onOpen: onPixOpen, onClose: onPixClose } = useDisclosure()
 
   const [products, setProducts] = useState([])
   const [sellers, setSellers] = useState([])
   const [cart, setCart] = useState([])
   const [searchQuery, setSearchQuery] = useState('')
   const [loading, setLoading] = useState(false)
+  const [showPixPayment, setShowPixPayment] = useState(false)
 
   const [saleData, setSaleData] = useState({
     customer_name: '',
@@ -193,6 +196,18 @@ export default function PointOfSale() {
       return
     }
 
+    // Se for PIX, mostrar modal de pagamento PIX
+    if (saleData.payment_method === 'pix') {
+      setShowPixPayment(true)
+      onPixOpen()
+      return
+    }
+
+    // Para outros métodos, finalizar venda normalmente
+    await completeAndFinalizeSale()
+  }
+
+  const completeAndFinalizeSale = async () => {
     setLoading(true)
     try {
       const opts = api.injectCsrf({}, auth.csrfToken)
@@ -228,6 +243,8 @@ export default function PointOfSale() {
         notes: '',
       })
       onClose()
+      setShowPixPayment(false)
+      onPixClose()
     } catch (error) {
       toast({
         title: 'Erro',
@@ -237,6 +254,11 @@ export default function PointOfSale() {
     } finally {
       setLoading(false)
     }
+  }
+
+  const handlePixPaymentConfirmed = async () => {
+    // Após pagamento PIX confirmado, finalizar venda
+    await completeAndFinalizeSale()
   }
 
   const clearCart = () => {
@@ -601,6 +623,25 @@ export default function PointOfSale() {
               Confirmar Venda
             </Button>
           </ModalFooter>
+        </ModalContent>
+      </Modal>
+
+      {/* Modal de Pagamento PIX */}
+      <Modal isOpen={isPixOpen} onClose={() => {}} size="lg" isCentered closeOnEsc={false} closeOnOverlayClick={false}>
+        <ModalOverlay backdropFilter="blur(10px)" />
+        <ModalContent bg="white" borderRadius="lg" boxShadow="2xl">
+          <ModalBody p={0}>
+            {showPixPayment && (
+              <PixPayment
+                amount={calculateTotal()}
+                onPaymentConfirmed={handlePixPaymentConfirmed}
+                onCancel={() => {
+                  setShowPixPayment(false)
+                  onPixClose()
+                }}
+              />
+            )}
+          </ModalBody>
         </ModalContent>
       </Modal>
     </Box>

@@ -2425,6 +2425,140 @@ app.post('/sales/:id/return', ensureAuth, verifyCsrf, (req, res) => {
   res.json(sale)
 })
 
+// ============================================
+// PIX PAYMENTS MODULE
+// ============================================
+
+// Armazenar transações PIX em memória
+let pixTransactions = new Map()
+let pixTransactionId = 0
+
+// POST /payments/pix/generate - Gerar QR Code PIX
+app.post('/payments/pix/generate', ensureAuth, verifyCsrf, (req, res) => {
+  const { amount, description } = req.body
+  
+  if (!amount || amount <= 0) {
+    return res.status(400).json({ error: 'Valor inválido' })
+  }
+  
+  // Gerar ID único para transação
+  pixTransactionId++
+  const transactionId = `PIX-${Date.now()}-${pixTransactionId}`
+  
+  // Simular chave PIX (em produção, seria da API do Banco Central)
+  // Formato: 00020126580014br.gov.bcb.pix...
+  const pixKey = '12345678-1234-1234-1234-123456789012' // CPF/CNPJ/Email/Telefone
+  // Formato correto: usar ponto, não vírgula
+  const amountFormatted = (amount / 100).toFixed(2)
+  
+  // Gerar QR Code string simplificada para testes
+  // Em produção, seria gerado pelo Banco Central via API
+  const qrCodeString = `00020126580014br.gov.bcb.pix0136${pixKey}5204000053039865403${amountFormatted}5802BR5913Varejix LTDA6009SaoPaulo62090505***63041D3D`
+  
+  // Armazenar transação
+  const pixTransaction = {
+    id: pixTransactionId,
+    transaction_id: transactionId,
+    amount,
+    description,
+    qr_code: qrCodeString,
+    qr_code_string: qrCodeString,
+    status: 'pending',
+    created_at: new Date().toISOString(),
+    expires_at: new Date(Date.now() + 5 * 60 * 1000).toISOString(), // 5 minutos
+    paid_at: null,
+    payer: null
+  }
+  
+  pixTransactions.set(transactionId, pixTransaction)
+  
+  res.status(201).json({
+    transaction_id: transactionId,
+    amount,
+    qr_code: qrCodeString,
+    qr_code_string: qrCodeString,
+    status: 'pending',
+    expires_in: 300 // segundos
+  })
+})
+
+// GET /payments/pix/status/:transactionId - Verificar status do pagamento
+app.get('/payments/pix/status/:transactionId', ensureAuth, verifyCsrf, (req, res) => {
+  const transactionId = req.params.transactionId
+  const transaction = pixTransactions.get(transactionId)
+  
+  if (!transaction) {
+    return res.status(404).json({ error: 'Transação não encontrada' })
+  }
+  
+  // Simular pagamento confirmado após alguns segundos (para demo)
+  // Em produção, consultaria a API do banco
+  const age = Date.now() - new Date(transaction.created_at).getTime()
+  // 70% de chance após 3 segundos (era 30% antes)
+  const shouldConfirm = age > 3000 && Math.random() > 0.3
+  
+  console.log(`[PIX] Status check: age=${age}ms, shouldConfirm=${shouldConfirm}, status=${transaction.status}`)
+  
+  if (shouldConfirm && transaction.status === 'pending') {
+    transaction.status = 'paid'
+    transaction.paid_at = new Date().toISOString()
+    transaction.payer = {
+      name: 'Cliente PIX',
+      document: '123.456.789-00'
+    }
+  }
+  
+  // Verificar se expirou
+  if (new Date() > new Date(transaction.expires_at) && transaction.status === 'pending') {
+    transaction.status = 'expired'
+  }
+  
+  res.json({
+    transaction_id: transactionId,
+    amount: transaction.amount,
+    status: transaction.status,
+    created_at: transaction.created_at,
+    paid_at: transaction.paid_at,
+    payer: transaction.payer
+  })
+})
+
+// POST /payments/pix/confirm/:transactionId - Confirmar pagamento PIX (webhook simulado)
+app.post('/payments/pix/confirm/:transactionId', (req, res) => {
+  const transactionId = req.params.transactionId
+  const transaction = pixTransactions.get(transactionId)
+  
+  if (!transaction) {
+    return res.status(404).json({ error: 'Transação não encontrada' })
+  }
+  
+  transaction.status = 'paid'
+  transaction.paid_at = new Date().toISOString()
+  transaction.payer = req.body?.payer || { name: 'Pagador PIX' }
+  
+  res.json({
+    transaction_id: transactionId,
+    status: 'paid',
+    paid_at: transaction.paid_at
+  })
+})
+
+// GET /payments/pix/transactions - Listar transações PIX
+app.get('/payments/pix/transactions', ensureAuth, (req, res) => {
+  const transactions = Array.from(pixTransactions.values())
+    .map(t => ({
+      transaction_id: t.transaction_id,
+      amount: t.amount,
+      status: t.status,
+      created_at: t.created_at,
+      paid_at: t.paid_at,
+      description: t.description
+    }))
+    .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+  
+  res.json({ items: transactions })
+})
+
 app.listen(PORT, () => {
   // eslint-disable-next-line no-console
   console.log(`Mock Express server listening on http://localhost:${PORT}`)
