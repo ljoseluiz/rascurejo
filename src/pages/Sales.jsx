@@ -38,8 +38,8 @@ export default function Sales() {
     return map[status] || { color: 'gray', label: status }
   }
 
-  const totalSales = sales.reduce((sum, s) => sum + s.total, 0)
-  const totalItems = sales.reduce((sum, s) => sum + s.quantity, 0)
+  const totalSales = sales.reduce((sum, s) => sum + (s.total || 0), 0)
+  const totalItems = sales.reduce((sum, s) => sum + (s.quantity || 0), 0)
   const avgTicket = sales.length > 0 ? totalSales / sales.length : 0
 
   return (
@@ -113,11 +113,11 @@ export default function Sales() {
                   <Tr key={sale.id}>
                     <Td>{sale.id}</Td>
                     <Td>{new Date(sale.date).toLocaleDateString('pt-BR')}</Td>
-                    <Td>{sale.customer}</Td>
-                    <Td>{sale.product}</Td>
-                    <Td isNumeric>{sale.quantity}</Td>
-                    <Td isNumeric>R$ {sale.unitPrice.toFixed(2)}</Td>
-                    <Td isNumeric fontWeight="bold">R$ {sale.total.toFixed(2)}</Td>
+                    <Td>{sale.customer_name || sale.customer || 'Cliente Avulso'}</Td>
+                    <Td>{sale.product || '—'}</Td>
+                    <Td isNumeric>{sale.quantity || 0}</Td>
+                    <Td isNumeric>R$ {(sale.unitPrice || sale.unit_price || 0).toFixed(2)}</Td>
+                    <Td isNumeric fontWeight="bold">R$ {(sale.total || 0).toFixed(2)}</Td>
                     <Td>
                       <Badge colorScheme={statusInfo.color}>{statusInfo.label}</Badge>
                     </Td>
