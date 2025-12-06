@@ -10,14 +10,19 @@ import {
   Grid,
   Heading,
   HStack,
+  IconButton,
   Input,
+  InputGroup,
+  InputRightElement,
   Select,
   Spinner,
   Switch,
   Textarea,
+  Tooltip,
   VStack,
   useToast
 } from '@chakra-ui/react'
+import { FiRefreshCw } from 'react-icons/fi'
 import { Controller, useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -130,6 +135,34 @@ export default function ProductForm({ product = null, onSubmit = () => {}, onCre
   const variations = watch('variations')
   const images = watch('images')
 
+  // Gera código de barras EAN-13 válido
+  const generateBarcode = () => {
+    // Gera 12 dígitos aleatórios
+    let code = ''
+    for (let i = 0; i < 12; i++) {
+      code += Math.floor(Math.random() * 10)
+    }
+    
+    // Calcula dígito verificador EAN-13
+    let sum = 0
+    for (let i = 0; i < 12; i++) {
+      const digit = parseInt(code[i])
+      sum += i % 2 === 0 ? digit : digit * 3
+    }
+    const checkDigit = (10 - (sum % 10)) % 10
+    
+    const fullCode = code + checkDigit
+    setValue('barcode', fullCode, { shouldValidate: true, shouldDirty: true })
+    
+    toast({
+      title: 'Código gerado!',
+      description: `EAN-13: ${fullCode}`,
+      status: 'success',
+      duration: 2000,
+      isClosable: true
+    })
+  }
+
   const onSubmitForm = async (data) => {
     try {
       const opts = api.injectCsrf({}, auth.csrfToken)
@@ -173,7 +206,22 @@ export default function ProductForm({ product = null, onSubmit = () => {}, onCre
           <Grid templateColumns={{ base: '1fr', md: '1fr 1fr 1fr' }} gap={4} w="full">
             <FormControl>
               <FormLabel>Código de Barras</FormLabel>
-              <Input placeholder="789..." bg="white" {...register('barcode')} />
+              <InputGroup>
+                <Input placeholder="789..." bg="white" {...register('barcode')} />
+                <InputRightElement>
+                  <Tooltip label="Gerar código EAN-13" placement="top">
+                    <IconButton
+                      icon={<FiRefreshCw />}
+                      size="sm"
+                      variant="ghost"
+                      colorScheme="blue"
+                      onClick={generateBarcode}
+                      aria-label="Gerar código de barras"
+                    />
+                  </Tooltip>
+                </InputRightElement>
+              </InputGroup>
+              <FormHelperText fontSize="xs">Clique no ícone para gerar automaticamente</FormHelperText>
             </FormControl>
 
             <FormControl isInvalid={!!errors.category} isRequired>
