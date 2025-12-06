@@ -12,7 +12,14 @@ const SECRET = process.env.MOCK_JWT_SECRET || 'dev-secret'
 
 // Allow requests from the Vite dev server and include credentials (cookies)
 app.use(cors({ 
-  origin: 'http://localhost:5173', 
+  origin: (origin, callback) => {
+    // Allow any localhost port during development
+    if (!origin || origin.startsWith('http://localhost:')) {
+      callback(null, true)
+    } else {
+      callback(new Error('Not allowed by CORS'))
+    }
+  },
   credentials: true, 
   allowedHeaders: ['Content-Type', 'X-CSRF-Token', 'Accept'],
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS']
