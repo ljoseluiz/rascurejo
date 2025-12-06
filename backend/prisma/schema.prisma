@@ -1,0 +1,70 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+
+}
+
+model product_brands {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  description String?
+  created_at  DateTime   @default(now()) @db.Timestamptz(6)
+  products    products[]
+}
+
+model product_categories {
+  id          Int        @id @default(autoincrement())
+  name        String     @unique
+  description String?
+  created_at  DateTime   @default(now()) @db.Timestamptz(6)
+  products    products[]
+}
+
+model product_units {
+  id       Int        @id @default(autoincrement())
+  code     String     @unique
+  name     String
+  products products[]
+}
+
+model products {
+  id                 Int                 @id @default(autoincrement())
+  name               String
+  sku                String?             @unique
+  barcode            String?
+  unit_id            Int?
+  category_id        Int?
+  brand_id           Int?
+  supplier_id        Int?
+  cost_price         Decimal?            @db.Decimal(14, 2)
+  sale_price         Decimal?            @db.Decimal(14, 2)
+  active             Boolean             @default(true)
+  created_at         DateTime            @default(now()) @db.Timestamptz(6)
+  updated_at         DateTime            @default(now()) @db.Timestamptz(6)
+  product_brands     product_brands?     @relation(fields: [brand_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product_categories product_categories? @relation(fields: [category_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  suppliers          suppliers?          @relation(fields: [supplier_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  product_units      product_units?      @relation(fields: [unit_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+}
+
+model suppliers {
+  id         Int        @id @default(autoincrement())
+  name       String
+  document   String?
+  email      String?
+  phone      String?
+  created_at DateTime   @default(now()) @db.Timestamptz(6)
+  products   products[]
+}
+
+model users {
+  id            String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  username      String   @unique
+  password_hash String
+  role          String   @default("admin")
+  created_at    DateTime @default(now()) @db.Timestamptz(6)
+}
