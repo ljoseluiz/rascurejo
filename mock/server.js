@@ -1952,20 +1952,72 @@ app.get('/financial/dashboard', (req, res) => {
   })
 })
 
-// Financial Reports
+// Financial Reports - DRE
 app.get('/financial/reports/dre', (req, res) => {
   const totalSales = accountsReceivable.filter(a => a.status === 'received').reduce((sum, a) => sum + a.amount, 0)
   const totalCosts = accountsPayable.filter(a => a.status === 'paid').reduce((sum, a) => sum + a.amount, 0)
   const profit = totalSales - totalCosts
-  const margin = ((profit / totalSales) * 100).toFixed(2)
+  const margin = totalSales > 0 ? ((profit / totalSales) * 100) : 0
   
   res.json({
     revenue: totalSales,
     costs: totalCosts,
     profit,
-    margin: parseFloat(margin),
+    margin: parseFloat(margin.toFixed(2)),
     type: 'DRE Simplificado'
   })
+})
+
+// Financial Reports - By Category
+app.get('/financial/reports/by-category', (req, res) => {
+  // Agrupar produtos por categoria
+  const categoryStats = {}
+  
+  products.forEach(product => {
+    const cat = product.category || 'Sem Categoria'
+    if (!categoryStats[cat]) {
+      categoryStats[cat] = {
+        category: cat,
+        totalProducts: 0,
+        totalStock: 0,
+        totalValue: 0,
+        avgPrice: 0,
+      }
+    }
+    
+    categoryStats[cat].totalProducts++
+    categoryStats[cat].totalStock += product.stock || 0
+    categoryStats[cat].totalValue += (product.prices?.sale || 0) * (product.stock || 0)
+  })
+  
+  // Calcular médias e ordenar por valor
+  const results = Object.values(categoryStats).map(cat => ({
+    ...cat,
+    avgPrice: cat.totalProducts > 0 ? cat.totalValue / cat.totalStock : 0,
+    margin: 0, // Pode ser calculado com dados de custo real
+  })).sort((a, b) => b.totalValue - a.totalValue)
+  
+  res.json({ items: results })
+})
+
+// Financial Reports - By Product
+app.get('/financial/reports/by-product', (req, res) => {
+  const limit = parseInt(req.query.limit || '20', 10)
+  
+  // Top produtos por valor em estoque
+  const productStats = products.map(product => ({
+    id: product.id,
+    name: product.name,
+    sku: product.sku,
+    category: product.category,
+    brand: product.brand,
+    stock: product.stock || 0,
+    price: product.prices?.sale || 0,
+    totalValue: (product.prices?.sale || 0) * (product.stock || 0),
+    margin: 0, // Pode ser calculado se houver preço de custo
+  })).sort((a, b) => b.totalValue - a.totalValue)
+  
+  res.json({ items: productStats.slice(0, limit) })
 })
 
 app.listen(PORT, () => {
