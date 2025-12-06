@@ -3,10 +3,15 @@ import { Routes, Route } from 'react-router-dom'
 import Dashboard from '../pages/Dashboard'
 import Products from '../pages/Products'
 import ProductsAdvanced from '../pages/ProductsAdvanced'
+import ProductNew from '../pages/ProductNew'
 import ProductDetail from '../pages/ProductDetail'
 import Inventory from '../pages/Inventory'
+import StockMovements from '../pages/StockMovements'
+import StockLevels from '../pages/StockLevels'
+import StockReports from '../pages/StockReports'
 import Sales from '../pages/Sales'
 import Reports from '../pages/Reports'
+import Settings from '../pages/Settings'
 import NotFound from '../pages/NotFound'
 import Login from '../pages/Login'
 import Logout from '../pages/Logout'
@@ -18,10 +23,15 @@ export default function AppRoutes() {
       <Route path="/" element={<Dashboard />} />
       <Route path="/products" element={<Products />} />
       <Route path="/products-advanced" element={<RequireAuth><ProductsAdvanced /></RequireAuth>} />
+      <Route path="/products/new" element={<RequireAuth><ProductNew /></RequireAuth>} />
       <Route path="/products/:id" element={<RequireAuth><ProductDetail /></RequireAuth>} />
       <Route path="/inventory" element={<RequireAuth><Inventory /></RequireAuth>} />
+      <Route path="/stock/movements" element={<RequireAuth><StockMovements /></RequireAuth>} />
+      <Route path="/stock/levels" element={<RequireAuth><StockLevels /></RequireAuth>} />
+      <Route path="/stock/reports" element={<RequireAuth><StockReports /></RequireAuth>} />
       <Route path="/sales" element={<RequireAuth><Sales /></RequireAuth>} />
       <Route path="/reports" element={<RequireAuth><Reports /></RequireAuth>} />
+      <Route path="/settings" element={<RequireAuth><Settings /></RequireAuth>} />
       <Route path="/login" element={<Login />} />
       <Route path="/logout" element={<Logout />} />
       <Route path="*" element={<NotFound />} />

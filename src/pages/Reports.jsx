@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Box, Button, Input, HStack, Heading, Table, Thead, Tbody, Tr, Th, Td, useToast, VStack, Text, SimpleGrid, Spinner } from '@chakra-ui/react'
+import { Box, Button, Input, HStack, Heading, Table, Thead, Tbody, Tr, Th, Td, useToast, VStack, Text, SimpleGrid, Spinner, Grid } from '@chakra-ui/react'
 import api from '../services/api'
 import { useAuth } from '../context/AuthContext'
 import { generateReportPdf } from '../utils/reportPdf'
@@ -103,18 +103,18 @@ export default function Reports() {
   }
 
   return (
-    <Box>
+    <Box p={6} w="full">
       <Heading mb={6}>Relatórios de Vendas</Heading>
 
       {/* Filter controls */}
       <Box bg="white" p={4} borderRadius="md" boxShadow="sm" mb={6}>
         <VStack spacing={3} align="stretch">
-          <HStack spacing={3}>
+          <Grid templateColumns={{ base: '1fr', md: 'repeat(2, 1fr) auto auto' }} gap={3}>
             <Input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} placeholder="Data Inicial" />
             <Input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} placeholder="Data Final" />
-            <Button onClick={loadReport} colorScheme="blue" isLoading={loading}>Gerar</Button>
-            <Button onClick={exportCSV} colorScheme="green">Exportar CSV</Button>
-          </HStack>
+            <Button onClick={loadReport} colorScheme="blue" isLoading={loading} minW="120px">Gerar</Button>
+            <Button onClick={exportCSV} colorScheme="green" minW="140px">Exportar CSV</Button>
+          </Grid>
           <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} spacing={3}>
             <Button colorScheme="blue" variant="outline" onClick={() => printPdf('sales')} isDisabled={!sales.length}>PDF Vendas</Button>
             <Button colorScheme="teal" variant="outline" onClick={() => printPdf('inventory')} isDisabled={!inventory.length}>PDF Estoque</Button>

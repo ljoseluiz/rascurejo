@@ -12,10 +12,10 @@ export default function App() {
       <div className="app" style={{ display: 'flex', flexDirection: 'column', minHeight: '100vh' }}>
         <Header onToggleSidebar={() => setIsSidebarOpen((prev) => !prev)} />
 
-        <main style={{ marginTop: 20, flex: 1 }}>
-          <div style={{ display: 'flex', gap: 16 }}>
+        <main style={{ flex: 1 }}>
+          <div style={{ display: 'flex', gap: 0, height: '100%' }}>
             <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-            <div style={{ flex: 1 }}>
+            <div style={{ flex: 1, overflow: 'auto' }}>
               <AppRoutes />
             </div>
           </div>

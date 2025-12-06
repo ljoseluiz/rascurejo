@@ -107,7 +107,7 @@ export default function ProductDetail() {
   }
 
   return (
-    <Box p={6}>
+    <Box p={6} w="full">
       {/* Cabeçalho */}
       <HStack justify="space-between" mb={6} align="start">
         <Box>

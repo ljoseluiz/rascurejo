@@ -23,6 +23,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import PriceSettings from './PriceSettings'
 import ProductVariations from './ProductVariations'
+import ProductImages from './ProductImages'
 import api from '../services/api'
 import { useAuth } from '../context/AuthContext'
 
@@ -77,7 +78,7 @@ function buildDefaults(product) {
   }
 }
 
-export default function ProductForm({ product = null, onSubmit = () => {}, onCreated = () => {} }) {
+export default function ProductForm({ product = null, onSubmit = () => {}, onCreated = () => {}, onCancel = null }) {
   const auth = useAuth()
   const toast = useToast()
   const [loadingMeta, setLoadingMeta] = useState(false)
@@ -124,6 +125,7 @@ export default function ProductForm({ product = null, onSubmit = () => {}, onCre
 
   const prices = watch('prices')
   const variations = watch('variations')
+  const images = watch('images')
 
   const onSubmitForm = async (data) => {
     try {
@@ -132,10 +134,8 @@ export default function ProductForm({ product = null, onSubmit = () => {}, onCre
 
       if (product && product.id) {
         result = await api.put(`/products/${product.id}`, data, opts)
-        toast({ title: 'Produto atualizado', status: 'success', duration: 3000, isClosable: true })
       } else {
         result = await api.post('/products', data, opts)
-        toast({ title: 'Produto criado', status: 'success', duration: 3000, isClosable: true })
       }
 
       onSubmit(result)
@@ -250,6 +250,19 @@ export default function ProductForm({ product = null, onSubmit = () => {}, onCre
 
         <Divider />
 
+        <VStack align="start" spacing={4} w="full">
+          <Heading size="md">Imagens</Heading>
+          <ProductImages
+            images={images}
+            onChange={(next) => setValue('images', next, { shouldValidate: true, shouldDirty: true })}
+          />
+          <FormControl isInvalid={!!errors.images}>
+            <FormErrorMessage>{errors.images?.message}</FormErrorMessage>
+          </FormControl>
+        </VStack>
+
+        <Divider />
+
         <Grid templateColumns={{ base: '1fr', md: '1fr 1fr' }} gap={4} w="full">
           <FormControl isInvalid={!!errors.stock}>
             <FormLabel>Estoque</FormLabel>
@@ -275,7 +288,17 @@ export default function ProductForm({ product = null, onSubmit = () => {}, onCre
         <Divider />
 
         <HStack spacing={4} justify="flex-end" w="full">
-          <Button variant="outline" onClick={() => reset(buildDefaults(product))} isDisabled={isSubmitting}>
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              if (onCancel) {
+                onCancel()
+              } else {
+                reset(buildDefaults(product))
+              }
+            }} 
+            isDisabled={isSubmitting}
+          >
             Cancelar
           </Button>
           <Button colorScheme="blue" type="submit" isLoading={isSubmitting}>

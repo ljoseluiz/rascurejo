@@ -116,6 +116,275 @@
           "changedAt": "2024-01-17T09:15:00Z"
         }
       ]
+    },
+    {
+      "id": 4,
+      "name": "Jaqueta de couro sintético",
+      "sku": "JAQ-004",
+      "barcode": "7891234567893",
+      "category": "Roupas",
+      "subcategory": "Jaquetas",
+      "brand": "TechWear",
+      "supplier": "Fornecedor A",
+      "description": "Jaqueta elegante em couro sintético de alta qualidade",
+      "prices": {
+        "sale": 189.90,
+        "promotion": 149.90,
+        "wholesale": 95.00
+      },
+      "unit": "un",
+      "images": [
+        { "id": 1, "url": "https://via.placeholder.com/300?text=Jaqueta", "alt": "Jaqueta de couro" }
+      ],
+      "variations": [
+        { "id": 1, "type": "Cor", "value": "Preto" },
+        { "id": 2, "type": "Tamanho", "value": "M" }
+      ],
+      "active": true,
+      "stock": 35,
+      "createdAt": "2024-01-18T11:20:00Z",
+      "updatedAt": "2024-01-18T11:20:00Z",
+      "history": [
+        {
+          "id": 1,
+          "type": "created",
+          "field": null,
+          "oldValue": null,
+          "newValue": null,
+          "changedBy": "admin",
+          "changedAt": "2024-01-18T11:20:00Z"
+        }
+      ]
+    },
+    {
+      "id": 5,
+      "name": "Boné trucker premium",
+      "sku": "BON-005",
+      "barcode": "7891234567894",
+      "category": "Acessórios",
+      "subcategory": "Bonés",
+      "brand": "SportMax",
+      "supplier": "Fornecedor C",
+      "description": "Boné estilo trucker com ajuste regulável e tela traseira",
+      "prices": {
+        "sale": 39.90,
+        "promotion": 29.90,
+        "wholesale": 18.00
+      },
+      "unit": "un",
+      "images": [
+        { "id": 1, "url": "https://via.placeholder.com/300?text=Bone", "alt": "Boné trucker" }
+      ],
+      "variations": [
+        { "id": 1, "type": "Cor", "value": "Cinza" }
+      ],
+      "active": true,
+      "stock": 120,
+      "createdAt": "2024-01-19T08:45:00Z",
+      "updatedAt": "2024-01-19T08:45:00Z",
+      "history": [
+        {
+          "id": 1,
+          "type": "created",
+          "field": null,
+          "oldValue": null,
+          "newValue": null,
+          "changedBy": "admin",
+          "changedAt": "2024-01-19T08:45:00Z"
+        }
+      ]
+    },
+    {
+      "id": 6,
+      "name": "Mochila escolar 30L",
+      "sku": "MOC-006",
+      "barcode": "7891234567895",
+      "category": "Acessórios",
+      "subcategory": "Mochilas",
+      "brand": "DenimCo",
+      "supplier": "Fornecedor B",
+      "description": "Mochila resistente com compartimento para notebook até 15 polegadas",
+      "prices": {
+        "sale": 89.90,
+        "promotion": 69.90,
+        "wholesale": 45.00
+      },
+      "unit": "un",
+      "images": [
+        { "id": 1, "url": "https://via.placeholder.com/300?text=Mochila", "alt": "Mochila escolar" }
+      ],
+      "variations": [
+        { "id": 1, "type": "Cor", "value": "Azul marinho" }
+      ],
+      "active": true,
+      "stock": 68,
+      "createdAt": "2024-01-20T13:10:00Z",
+      "updatedAt": "2024-01-20T13:10:00Z",
+      "history": [
+        {
+          "id": 1,
+          "type": "created",
+          "field": null,
+          "oldValue": null,
+          "newValue": null,
+          "changedBy": "admin",
+          "changedAt": "2024-01-20T13:10:00Z"
+        }
+      ]
+    },
+    {
+      "id": 7,
+      "name": "Relógio digital esportivo",
+      "sku": "REL-007",
+      "barcode": "7891234567896",
+      "category": "Acessórios",
+      "subcategory": "Relógios",
+      "brand": "SportMax",
+      "supplier": "Fornecedor C",
+      "description": "Relógio digital com cronômetro, alarme e resistência à água",
+      "prices": {
+        "sale": 79.90,
+        "promotion": 59.90,
+        "wholesale": 40.00
+      },
+      "unit": "un",
+      "images": [
+        { "id": 1, "url": "https://via.placeholder.com/300?text=Relogio", "alt": "Relógio esportivo" }
+      ],
+      "variations": [
+        { "id": 1, "type": "Cor", "value": "Preto" }
+      ],
+      "active": true,
+      "stock": 92,
+      "createdAt": "2024-01-21T16:30:00Z",
+      "updatedAt": "2024-01-21T16:30:00Z",
+      "history": [
+        {
+          "id": 1,
+          "type": "created",
+          "field": null,
+          "oldValue": null,
+          "newValue": null,
+          "changedBy": "admin",
+          "changedAt": "2024-01-21T16:30:00Z"
+        }
+      ]
+    },
+    {
+      "id": 8,
+      "name": "Shorts moletom confort",
+      "sku": "SHO-008",
+      "barcode": "7891234567897",
+      "category": "Roupas",
+      "subcategory": "Shorts",
+      "brand": "TechWear",
+      "supplier": "Fornecedor A",
+      "description": "Shorts em moletom premium com bolsos laterais e ajuste por cordão",
+      "prices": {
+        "sale": 59.90,
+        "promotion": 49.90,
+        "wholesale": 30.00
+      },
+      "unit": "un",
+      "images": [
+        { "id": 1, "url": "https://via.placeholder.com/300?text=Shorts", "alt": "Shorts moletom" }
+      ],
+      "variations": [
+        { "id": 1, "type": "Cor", "value": "Cinza mescla" },
+        { "id": 2, "type": "Tamanho", "value": "M" }
+      ],
+      "active": true,
+      "stock": 77,
+      "createdAt": "2024-01-22T09:00:00Z",
+      "updatedAt": "2024-01-22T09:00:00Z",
+      "history": [
+        {
+          "id": 1,
+          "type": "created",
+          "field": null,
+          "oldValue": null,
+          "newValue": null,
+          "changedBy": "admin",
+          "changedAt": "2024-01-22T09:00:00Z"
+        }
+      ]
+    },
+    {
+      "id": 9,
+      "name": "Chinelo slide conforto",
+      "sku": "CHI-009",
+      "barcode": "7891234567898",
+      "category": "Calçados",
+      "subcategory": "Chinelos",
+      "brand": "SportMax",
+      "supplier": "Fornecedor C",
+      "description": "Chinelo tipo slide com palmilha anatômica e material antiderrapante",
+      "prices": {
+        "sale": 34.90,
+        "promotion": 24.90,
+        "wholesale": 15.00
+      },
+      "unit": "par",
+      "images": [
+        { "id": 1, "url": "https://via.placeholder.com/300?text=Chinelo", "alt": "Chinelo slide" }
+      ],
+      "variations": [
+        { "id": 1, "type": "Tamanho", "value": "40" },
+        { "id": 2, "type": "Cor", "value": "Preto" }
+      ],
+      "active": true,
+      "stock": 105,
+      "createdAt": "2024-01-23T14:15:00Z",
+      "updatedAt": "2024-01-23T14:15:00Z",
+      "history": [
+        {
+          "id": 1,
+          "type": "created",
+          "field": null,
+          "oldValue": null,
+          "newValue": null,
+          "changedBy": "admin",
+          "changedAt": "2024-01-23T14:15:00Z"
+        }
+      ]
+    },
+    {
+      "id": 10,
+      "name": "Óculos de sol aviador",
+      "sku": "OCU-010",
+      "barcode": "7891234567899",
+      "category": "Acessórios",
+      "subcategory": "Óculos",
+      "brand": "DenimCo",
+      "supplier": "Fornecedor B",
+      "description": "Óculos de sol estilo aviador com proteção UV400 e armação metálica",
+      "prices": {
+        "sale": 99.90,
+        "promotion": 79.90,
+        "wholesale": 50.00
+      },
+      "unit": "un",
+      "images": [
+        { "id": 1, "url": "https://via.placeholder.com/300?text=Oculos", "alt": "Óculos aviador" }
+      ],
+      "variations": [
+        { "id": 1, "type": "Cor", "value": "Dourado" }
+      ],
+      "active": true,
+      "stock": 58,
+      "createdAt": "2024-01-24T10:40:00Z",
+      "updatedAt": "2024-01-24T10:40:00Z",
+      "history": [
+        {
+          "id": 1,
+          "type": "created",
+          "field": null,
+          "oldValue": null,
+          "newValue": null,
+          "changedBy": "admin",
+          "changedAt": "2024-01-24T10:40:00Z"
+        }
+      ]
     }
   ],
   "categories": [
@@ -133,5 +402,134 @@
     { "id": 1, "name": "Fornecedor A", "contact": "contato@fornecedor-a.com", "phone": "(11) 98765-4321" },
     { "id": 2, "name": "Fornecedor B", "contact": "vendas@fornecedor-b.com", "phone": "(11) 98765-4322" },
     { "id": 3, "name": "Fornecedor C", "contact": "pedidos@fornecedor-c.com", "phone": "(11) 98765-4323" }
-  ]
+  ],
+  "stock_locations": [
+    { "id": 1, "name": "Depósito Central", "type": "warehouse", "address": "Rua Industrial, 100", "active": true },
+    { "id": 2, "name": "Loja Física - Centro", "type": "store", "address": "Av. Principal, 500", "active": true },
+    { "id": 3, "name": "Loja Física - Shopping", "type": "store", "address": "Shopping Center, Loja 42", "active": true },
+    { "id": 4, "name": "Depósito Secundário", "type": "warehouse", "address": "Rua dos Fundos, 25", "active": false }
+  ],
+  "stock_movements": [
+    {
+      "id": 1,
+      "product_id": 1,
+      "location_id": 1,
+      "type": "in",
+      "subtype": "purchase",
+      "quantity": 100,
+      "unit_cost": 12.00,
+      "total_cost": 1200.00,
+      "batch_number": "LOTE-2024-001",
+      "expiration_date": null,
+      "reference_doc": "NF-12345",
+      "notes": "Compra inicial de estoque",
+      "created_by": "admin",
+      "created_at": "2024-01-10T09:00:00Z"
+    },
+    {
+      "id": 2,
+      "product_id": 1,
+      "location_id": 1,
+      "type": "out",
+      "subtype": "sale",
+      "quantity": 20,
+      "unit_cost": 12.00,
+      "total_cost": 240.00,
+      "batch_number": "LOTE-2024-001",
+      "expiration_date": null,
+      "reference_doc": "VENDA-001",
+      "notes": "Venda para cliente",
+      "created_by": "admin",
+      "created_at": "2024-01-12T14:30:00Z"
+    },
+    {
+      "id": 3,
+      "product_id": 2,
+      "location_id": 2,
+      "type": "in",
+      "subtype": "purchase",
+      "quantity": 50,
+      "unit_cost": 65.00,
+      "total_cost": 3250.00,
+      "batch_number": "LOTE-2024-002",
+      "expiration_date": null,
+      "reference_doc": "NF-12346",
+      "notes": "Compra para loja física",
+      "created_by": "admin",
+      "created_at": "2024-01-15T10:00:00Z"
+    },
+    {
+      "id": 4,
+      "product_id": 3,
+      "location_id": 1,
+      "type": "in",
+      "subtype": "adjustment_positive",
+      "quantity": 5,
+      "unit_cost": 95.00,
+      "total_cost": 475.00,
+      "batch_number": null,
+      "expiration_date": null,
+      "reference_doc": "AJ-001",
+      "notes": "Ajuste de inventário - encontrados em conferência",
+      "created_by": "admin",
+      "created_at": "2024-01-20T16:00:00Z"
+    },
+    {
+      "id": 5,
+      "product_id": 1,
+      "location_id": 1,
+      "type": "out",
+      "subtype": "loss",
+      "quantity": 3,
+      "unit_cost": 12.00,
+      "total_cost": 36.00,
+      "batch_number": "LOTE-2024-001",
+      "expiration_date": null,
+      "reference_doc": null,
+      "notes": "Produtos danificados em estoque",
+      "created_by": "admin",
+      "created_at": "2024-01-25T11:00:00Z"
+    }
+  ],
+  "stock_levels": [
+    { "product_id": 1, "location_id": 1, "quantity": 77, "min_stock": 20, "max_stock": 200, "last_updated": "2024-01-25T11:00:00Z" },
+    { "product_id": 1, "location_id": 2, "quantity": 30, "min_stock": 10, "max_stock": 50, "last_updated": "2024-01-15T10:00:00Z" },
+    { "product_id": 2, "location_id": 1, "quantity": 35, "min_stock": 15, "max_stock": 100, "last_updated": "2024-01-16T14:30:00Z" },
+    { "product_id": 2, "location_id": 2, "quantity": 50, "min_stock": 10, "max_stock": 60, "last_updated": "2024-01-15T10:00:00Z" },
+    { "product_id": 3, "location_id": 1, "quantity": 47, "min_stock": 10, "max_stock": 80, "last_updated": "2024-01-20T16:00:00Z" },
+    { "product_id": 4, "location_id": 1, "quantity": 35, "min_stock": 8, "max_stock": 60, "last_updated": "2024-01-18T10:00:00Z" },
+    { "product_id": 5, "location_id": 2, "quantity": 5, "min_stock": 15, "max_stock": 50, "last_updated": "2024-01-19T10:00:00Z" },
+    { "product_id": 6, "location_id": 1, "quantity": 68, "min_stock": 20, "max_stock": 100, "last_updated": "2024-01-20T10:00:00Z" },
+    { "product_id": 7, "location_id": 2, "quantity": 3, "min_stock": 10, "max_stock": 40, "last_updated": "2024-01-21T10:00:00Z" },
+    { "product_id": 8, "location_id": 1, "quantity": 77, "min_stock": 15, "max_stock": 90, "last_updated": "2024-01-22T10:00:00Z" },
+    { "product_id": 9, "location_id": 3, "quantity": 105, "min_stock": 30, "max_stock": 150, "last_updated": "2024-01-23T10:00:00Z" },
+    { "product_id": 10, "location_id": 2, "quantity": 8, "min_stock": 12, "max_stock": 70, "last_updated": "2024-01-24T10:00:00Z" }
+  ],
+  "stock_batches": [
+    {
+      "id": 1,
+      "product_id": 1,
+      "location_id": 1,
+      "batch_number": "LOTE-2024-001",
+      "quantity": 77,
+      "expiration_date": null,
+      "manufacture_date": "2024-01-05",
+      "supplier_id": 1,
+      "unit_cost": 12.00,
+      "created_at": "2024-01-10T09:00:00Z"
+    },
+    {
+      "id": 2,
+      "product_id": 2,
+      "location_id": 2,
+      "batch_number": "LOTE-2024-002",
+      "quantity": 50,
+      "expiration_date": null,
+      "manufacture_date": "2024-01-10",
+      "supplier_id": 2,
+      "unit_cost": 65.00,
+      "created_at": "2024-01-15T10:00:00Z"
+    }
+  ],
+  "stock_alerts": []
 }

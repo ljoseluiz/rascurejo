@@ -148,13 +148,14 @@ export default function ProductsAdvanced() {
   }
 
   const handleFormSubmit = () => {
+    toast({ title: 'Sucesso', description: 'Produto salvo com sucesso', status: 'success', duration: 3000, isClosable: true })
     onFormClose()
     setPage(1)
     loadProducts()
   }
 
   return (
-    <Box p={6}>
+    <Box p={6} w="full">
       <Heading mb={6}>Gestão de Produtos</Heading>
 
       {/* Barra de Busca e Filtros */}
@@ -381,6 +382,7 @@ export default function ProductsAdvanced() {
             <ProductForm
               product={selectedProduct}
               onSubmit={handleFormSubmit}
+              onCancel={onFormClose}
             />
           </ModalBody>
         </ModalContent>

@@ -33,7 +33,7 @@ export default function Dashboard() {
   const revenueGrowth = stats?.revenueGrowth || 0
 
   return (
-    <Box p={6}>
+    <Box p={6} w="full">
       <Heading mb={6}>Dashboard</Heading>
 
       {/* Key metrics - 6 cards */}

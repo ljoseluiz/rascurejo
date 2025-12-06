@@ -1,60 +1,77 @@
-import React, { useState } from 'react'
-import { Box, Heading, Text, Badge, HStack, Button, AlertDialog, AlertDialogBody, AlertDialogFooter, AlertDialogHeader, AlertDialogContent, AlertDialogOverlay, useDisclosure, useToast } from '@chakra-ui/react'
-import api from '../services/api'
-import { useAuth } from '../context/AuthContext'
+import React from 'react'
+import { Box, Heading, Text, Badge, HStack, IconButton, VStack, Image } from '@chakra-ui/react'
+import { EditIcon, DeleteIcon } from '@chakra-ui/icons'
 
-export default function ProductCard({ product, onEdit, onDeleted }) {
-  const auth = useAuth()
-  const toast = useToast()
-  const [deleting, setDeleting] = useState(false)
-  const { isOpen, onOpen, onClose } = useDisclosure()
-  const cancelRef = React.useRef()
+export default function ProductCard({ product, onEdit, onDelete, onView }) {
+  const { name, sku, prices, stock, active, category, brand, images } = product || {}
+  const imageUrl = images && images[0]?.url
 
-  async function handleDelete() {
-    setDeleting(true)
-    try {
-      const opts = api.injectCsrf({}, auth.csrfToken)
-      await api.delete(`/products/${product.id}`, undefined, opts)
-      toast({ title: 'Deletado', description: `${product.name} foi removido.`, status: 'success', duration: 2000, isClosable: true })
-      if (onDeleted) onDeleted(product.id)
-    } catch (err) {
-      toast({ title: 'Erro', description: err.message, status: 'error', duration: 3000, isClosable: true })
-    } finally {
-      setDeleting(false)
-      onClose()
-    }
-  }
-
-  const { id, name, sku, price } = product || {}
   return (
-    <>
-      <Box bg="white" p={4} borderRadius="md" boxShadow="xs">
-        <Heading size="sm" mb={2}>{name}</Heading>
-        <Text fontSize="sm">SKU: <Badge ml={2}>{sku}</Badge></Text>
-        <Text mt={2} fontWeight="bold">R$ {price}</Text>
-        <HStack mt={3} spacing={2}>
-          <Button size="sm" colorScheme="blue" onClick={() => onEdit && onEdit(product)}>Editar</Button>
-          <Button size="sm" colorScheme="red" onClick={onOpen}>Deletar</Button>
+    <Box 
+      bg="white" 
+      borderRadius="md" 
+      boxShadow="md" 
+      overflow="hidden"
+      _hover={{ boxShadow: 'lg', transform: 'translateY(-2px)' }}
+      transition="all 0.2s"
+    >
+      {imageUrl && (
+        <Image 
+          src={imageUrl} 
+          alt={name} 
+          w="full" 
+          h="180px" 
+          objectFit="cover"
+          fallbackSrc="https://via.placeholder.com/300x180?text=Sem+Imagem"
+        />
+      )}
+      
+      <VStack align="start" p={4} spacing={2}>
+        <HStack justify="space-between" w="full">
+          <Heading size="sm" noOfLines={1}>{name}</Heading>
+          <Badge colorScheme={active ? 'green' : 'gray'}>
+            {active ? 'Ativo' : 'Inativo'}
+          </Badge>
         </HStack>
-      </Box>
-
-      <AlertDialog isOpen={isOpen} leastDestructiveRef={cancelRef} onClose={onClose}>
-        <AlertDialogOverlay>
-          <AlertDialogContent>
-            <AlertDialogHeader fontSize="lg" fontWeight="bold">
-              Deletar {name}
-            </AlertDialogHeader>
-            <AlertDialogBody>
-              Tem certeza? Esta ação não pode ser desfeita.
-            </AlertDialogBody>
-            <AlertDialogFooter>
-              <Button ref={cancelRef} onClick={onClose}>Cancelar</Button>
-              <Button colorScheme="red" onClick={handleDelete} ml={3} isLoading={deleting}>Deletar</Button>
-            </AlertDialogFooter>
-          </AlertDialogContent>
-        </AlertDialogOverlay>
-      </AlertDialog>
-    </>
+        
+        <Text fontSize="xs" color="gray.600">SKU: {sku}</Text>
+        <Text fontSize="xs" color="gray.600">{category} • {brand}</Text>
+        
+        <HStack justify="space-between" w="full" pt={2}>
+          <VStack align="start" spacing={0}>
+            <Text fontSize="lg" fontWeight="bold" color="blue.600">
+              R$ {(prices?.sale || 0).toFixed(2)}
+            </Text>
+            <Badge colorScheme={stock > 10 ? 'green' : stock > 0 ? 'yellow' : 'red'}>
+              Estoque: {stock}
+            </Badge>
+          </VStack>
+          
+          <HStack spacing={1}>
+            {onEdit && (
+              <IconButton
+                icon={<EditIcon />}
+                size="sm"
+                colorScheme="blue"
+                variant="ghost"
+                onClick={() => onEdit(product)}
+                aria-label="Editar produto"
+              />
+            )}
+            {onDelete && (
+              <IconButton
+                icon={<DeleteIcon />}
+                size="sm"
+                colorScheme="red"
+                variant="ghost"
+                onClick={() => onDelete(product.id)}
+                aria-label="Deletar produto"
+              />
+            )}
+          </HStack>
+        </HStack>
+      </VStack>
+    </Box>
   )
 }
 

@@ -43,7 +43,7 @@ export default function Sales() {
   const avgTicket = sales.length > 0 ? totalSales / sales.length : 0
 
   return (
-    <Box p={6}>
+    <Box p={6} w="full">
       <Heading mb={6}>Vendas</Heading>
 
       {/* KPIs */}
