@@ -3,3 +3,10 @@ node_modules
 .env
 
 /generated/prisma
+
+# Prevent backup and temporary files
+*copy.js
+*copy.json
+*.backup
+*.tmp
+*.old
