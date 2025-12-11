@@ -4,6 +4,54 @@ import { requireCsrf } from "../middlewares/csrf.js";
 
 const router = express.Router();
 
+// GET /products/categories - List all categories (MUST be before /:id routes)
+router.get("/categories", async (req, res, next) => {
+  try {
+    const categories = await prisma.product_categories.findMany({
+      orderBy: { name: "asc" },
+    });
+    res.json(categories);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /products/brands - List all brands (MUST be before /:id routes)
+router.get("/brands", async (req, res, next) => {
+  try {
+    const brands = await prisma.product_brands.findMany({
+      orderBy: { name: "asc" },
+    });
+    res.json(brands);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /products/suppliers - List all suppliers (MUST be before /:id routes)
+router.get("/suppliers", async (req, res, next) => {
+  try {
+    const suppliers = await prisma.suppliers.findMany({
+      orderBy: { name: "asc" },
+    });
+    res.json(suppliers);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /products/units - List all units (MUST be before /:id routes)
+router.get("/units", async (req, res, next) => {
+  try {
+    const units = await prisma.product_units.findMany({
+      orderBy: { name: "asc" },
+    });
+    res.json(units);
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /products?q=&page=&limit=
 router.get("/", async (req, res, next) => {
   try {
