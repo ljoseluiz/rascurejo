@@ -1,5 +1,5 @@
 import express from "express";
-import { validateUser, createSessionCookie, clearSessionCookie, getUserFromSession } from "../lib/auth.js";
+import { validateUser, createSessionCookie, clearSessionCookie, getUserFromSession, clearSession } from "../lib/auth.js";
 
 const router = express.Router();
 
@@ -58,6 +58,8 @@ router.get("/me", async (req, res, next) => {
 // POST /auth/logout
 router.post("/logout", async (req, res, next) => {
   try {
+    const sid = req.cookies?.session;
+    clearSession(sid);
     clearSessionCookie(res);
     res.json({ ok: true });
   } catch (err) {

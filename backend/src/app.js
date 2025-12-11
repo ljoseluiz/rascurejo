@@ -10,6 +10,7 @@ import authRouter from "./routes/auth.js";
 import productsRouter from "./routes/products.js";
 import statsRouter from "./routes/stats.js";
 import reportsRouter from "./routes/reports.js";
+import salesRouter from "./routes/sales.js";
 
 import { errorHandler } from "./middlewares/error.js";
 import { attachCsrf } from "./middlewares/csrf.js";
@@ -33,7 +34,9 @@ app.use((req, res, next) => {
 app.use(helmet());
 
 // CORS with credentials aligned to front
-const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || "http://localhost:5173")
+// COMPATIBILITY NOTE: Add fallback for both localhost:5173 and 127.0.0.1:5173
+const defaultOrigins = "http://localhost:5173,http://127.0.0.1:5173";
+const allowedOrigins = (process.env.CORS_ALLOWED_ORIGINS || defaultOrigins)
   .split(",")
   .map((o) => o.trim());
 
@@ -57,13 +60,26 @@ app.use(attachCsrf);
 app.get("/health", (req, res) => res.json({ status: "ok", time: new Date().toISOString() }));
 app.get("/ready", (req, res) => res.json({ status: "ready" }));
 
-// API routes (keep /api prefix if front proxy expects it)
+// COMPATIBILITY NOTE: Dual-route mounting for frontend compatibility
+// Frontend Vite proxy at localhost:5173 strips /api prefix before forwarding to backend.
+// To support both direct calls (/api/...) and proxied calls (without /api),
+// we mount all routers at BOTH prefixed and unprefixed paths.
+// TODO: Remove unprefixed routes once frontend consistently uses one pattern.
 const prefix = process.env.API_PREFIX || "/api";
 
+// Mount with /api prefix
 app.use(`${prefix}/auth`, authRouter);
 app.use(`${prefix}/products`, productsRouter);
 app.use(`${prefix}/stats`, statsRouter);
 app.use(`${prefix}/reports`, reportsRouter);
+app.use(`${prefix}/sales`, salesRouter);
+
+// Mount without prefix for Vite proxy compatibility
+app.use("/auth", authRouter);
+app.use("/products", productsRouter);
+app.use("/stats", statsRouter);
+app.use("/reports", reportsRouter);
+app.use("/sales", salesRouter);
 
 // 404 handler
 app.use((req, res) => {

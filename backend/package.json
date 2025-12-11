@@ -2,13 +2,14 @@
   "name": "backend",
   "version": "1.0.0",
   "description": "Backend profissional para varejix (rascunho)",
+  "type": "module",
   "main": "src/server.js",
   "scripts": {
     "dev": "node src/server.js",
     "start": "NODE_ENV=production node src/server.js",
     "prisma:generate": "prisma generate",
     "prisma:migrate": "prisma migrate dev",
-    "db:seed": "node prisma/seed.js",
+    "db:seed": "node prisma/seeds.js",
     "test": "echo \"No tests yet\" && exit 0"
   },
   "keywords": [],

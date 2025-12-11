@@ -4,7 +4,14 @@ import { prisma } from "./prisma.js";
 /**
  * Minimal session implementation using httpOnly cookie.
  * For production, use a store (Redis) and rotate session IDs.
+ * 
+ * COMPATIBILITY NOTE: In-memory session store added for development mode.
+ * This allows /auth/me to return user data when logged in.
+ * TODO: Replace with Redis or database-backed sessions in production
  */
+
+// In-memory session store for development (Map<sessionId, userData>)
+const sessionStore = new Map();
 
 function hashPassword(password) {
   // Replace with bcrypt in a real deployment
@@ -22,7 +29,15 @@ export async function validateUser(username, password) {
 export async function createSessionCookie(res, user) {
   // naive session id; prefer signed/opaque token tied to a store
   const sid = crypto.randomBytes(18).toString("hex");
-  // In production, persist session <sid, userId, expiry> in a store
+  
+  // Store user data in session store (development mode)
+  sessionStore.set(sid, {
+    id: user.id,
+    username: user.username,
+    role: user.role,
+    createdAt: Date.now(),
+  });
+  
   res.cookie("session", sid, {
     httpOnly: true,
     sameSite: "lax",
@@ -39,7 +54,24 @@ export function clearSessionCookie(res) {
 export async function getUserFromSession(req) {
   const sid = req.cookies?.session;
   if (!sid) return null;
-  // For demo purposes sid is not persisted. Assume user id in header? Not safe.
-  // Here we’ll just return null unless future enhancement binds sid to store.
-  return null;
+  
+  // Retrieve user from in-memory store
+  const userData = sessionStore.get(sid);
+  if (!userData) return null;
+  
+  // Check if session expired (12 hours)
+  const maxAge = 1000 * 60 * 60 * 12;
+  if (Date.now() - userData.createdAt > maxAge) {
+    sessionStore.delete(sid);
+    return null;
+  }
+  
+  return userData;
+}
+
+// Clear session from store on logout
+export function clearSession(sid) {
+  if (sid) {
+    sessionStore.delete(sid);
+  }
 }
