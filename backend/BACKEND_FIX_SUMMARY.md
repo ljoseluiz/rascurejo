@@ -183,3 +183,10 @@ All code changes include `COMPATIBILITY NOTE` comments marking:
 - Placeholder sales stats (sales.js lines 5-22)
 
 These can be cleaned up once frontend uses consistent API paths.
+
+## Future Enhancements (Optional)
+
+1. **Configuration-based dual routing**: Add env var like `ENABLE_DUAL_ROUTES=true` to toggle compatibility mode
+2. **Move TODO examples to docs**: Extract implementation examples from sales.js to separate documentation
+3. **Session store abstraction**: Create interface to swap between in-memory, Redis, database storage
+4. **Metrics**: Add monitoring for session store size, cleanup runs, expired session counts

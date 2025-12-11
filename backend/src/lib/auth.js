@@ -23,6 +23,10 @@ let cleanupInterval = null;
 /**
  * Start periodic cleanup of expired sessions to prevent memory leaks.
  * Should be called once during server initialization.
+ * 
+ * The cleanup runs every 30 minutes and removes sessions older than 12 hours.
+ * Safe to call multiple times - subsequent calls are ignored if already started.
+ * Uses unref() to allow Node.js to exit gracefully even with active interval.
  */
 export function startSessionCleanup() {
   if (cleanupInterval) return; // Already started
@@ -41,7 +45,10 @@ export function startSessionCleanup() {
 }
 
 /**
- * Stop session cleanup (mainly for testing)
+ * Stop session cleanup (mainly for testing).
+ * Safe to call multiple times - does nothing if cleanup not started.
+ * 
+ * @returns {void}
  */
 export function stopSessionCleanup() {
   if (cleanupInterval) {
