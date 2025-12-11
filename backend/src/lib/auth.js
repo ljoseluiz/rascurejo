@@ -17,15 +17,38 @@ const SESSION_CLEANUP_INTERVAL_MS = 1000 * 60 * 30; // 30 minutes
 // In-memory session store for development (Map<sessionId, userData>)
 const sessionStore = new Map();
 
-// Periodic cleanup of expired sessions to prevent memory leaks
-setInterval(() => {
-  const now = Date.now();
-  for (const [sid, data] of sessionStore.entries()) {
-    if (now - data.createdAt > SESSION_MAX_AGE_MS) {
-      sessionStore.delete(sid);
+// Cleanup interval reference (only start once)
+let cleanupInterval = null;
+
+/**
+ * Start periodic cleanup of expired sessions to prevent memory leaks.
+ * Should be called once during server initialization.
+ */
+export function startSessionCleanup() {
+  if (cleanupInterval) return; // Already started
+  
+  cleanupInterval = setInterval(() => {
+    const now = Date.now();
+    for (const [sid, data] of sessionStore.entries()) {
+      if (now - data.createdAt > SESSION_MAX_AGE_MS) {
+        sessionStore.delete(sid);
+      }
     }
+  }, SESSION_CLEANUP_INTERVAL_MS);
+  
+  // Allow Node to exit even if interval is running
+  cleanupInterval.unref();
+}
+
+/**
+ * Stop session cleanup (mainly for testing)
+ */
+export function stopSessionCleanup() {
+  if (cleanupInterval) {
+    clearInterval(cleanupInterval);
+    cleanupInterval = null;
   }
-}, SESSION_CLEANUP_INTERVAL_MS);
+}
 
 function hashPassword(password) {
   // Replace with bcrypt in a real deployment

@@ -28,11 +28,19 @@ router.get("/stats", async (req, res, next) => {
       top_sellers: [],
     };
 
-    // TODO: When orders/sales table is added to schema, compute real stats:
-    // const today = new Date().toISOString().split('T')[0];
-    // const todaySales = await prisma.orders.count({ where: { date: { startsWith: today }, status: 'completed' } });
-    // const todayRevenue = await prisma.orders.aggregate({ where: { date: { startsWith: today }, status: 'completed' }, _sum: { total: true } });
-    // etc.
+    // TODO: When orders/sales table is added to schema, compute real stats using proper date queries:
+    // const today = new Date();
+    // today.setHours(0, 0, 0, 0);
+    // const tomorrow = new Date(today);
+    // tomorrow.setDate(tomorrow.getDate() + 1);
+    // 
+    // const todaySales = await prisma.orders.count({
+    //   where: { created_at: { gte: today, lt: tomorrow }, status: 'completed' }
+    // });
+    // const todayRevenue = await prisma.orders.aggregate({
+    //   where: { created_at: { gte: today, lt: tomorrow }, status: 'completed' },
+    //   _sum: { total: true }
+    // });
 
     res.json(placeholderStats);
   } catch (err) {
