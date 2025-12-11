@@ -10,8 +10,22 @@ import { prisma } from "./prisma.js";
  * TODO: Replace with Redis or database-backed sessions in production
  */
 
+// Session configuration
+const SESSION_MAX_AGE_MS = 1000 * 60 * 60 * 12; // 12 hours
+const SESSION_CLEANUP_INTERVAL_MS = 1000 * 60 * 30; // 30 minutes
+
 // In-memory session store for development (Map<sessionId, userData>)
 const sessionStore = new Map();
+
+// Periodic cleanup of expired sessions to prevent memory leaks
+setInterval(() => {
+  const now = Date.now();
+  for (const [sid, data] of sessionStore.entries()) {
+    if (now - data.createdAt > SESSION_MAX_AGE_MS) {
+      sessionStore.delete(sid);
+    }
+  }
+}, SESSION_CLEANUP_INTERVAL_MS);
 
 function hashPassword(password) {
   // Replace with bcrypt in a real deployment
@@ -42,7 +56,7 @@ export async function createSessionCookie(res, user) {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    maxAge: 1000 * 60 * 60 * 12, // 12 hours
+    maxAge: SESSION_MAX_AGE_MS,
   });
   return sid;
 }
@@ -59,9 +73,8 @@ export async function getUserFromSession(req) {
   const userData = sessionStore.get(sid);
   if (!userData) return null;
   
-  // Check if session expired (12 hours)
-  const maxAge = 1000 * 60 * 60 * 12;
-  if (Date.now() - userData.createdAt > maxAge) {
+  // Check if session expired
+  if (Date.now() - userData.createdAt > SESSION_MAX_AGE_MS) {
     sessionStore.delete(sid);
     return null;
   }

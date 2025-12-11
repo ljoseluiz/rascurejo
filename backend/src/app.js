@@ -67,19 +67,20 @@ app.get("/ready", (req, res) => res.json({ status: "ready" }));
 // TODO: Remove unprefixed routes once frontend consistently uses one pattern.
 const prefix = process.env.API_PREFIX || "/api";
 
-// Mount with /api prefix
-app.use(`${prefix}/auth`, authRouter);
-app.use(`${prefix}/products`, productsRouter);
-app.use(`${prefix}/stats`, statsRouter);
-app.use(`${prefix}/reports`, reportsRouter);
-app.use(`${prefix}/sales`, salesRouter);
+// Define route mappings to reduce duplication
+const routes = [
+  { path: "/auth", router: authRouter },
+  { path: "/products", router: productsRouter },
+  { path: "/stats", router: statsRouter },
+  { path: "/reports", router: reportsRouter },
+  { path: "/sales", router: salesRouter },
+];
 
-// Mount without prefix for Vite proxy compatibility
-app.use("/auth", authRouter);
-app.use("/products", productsRouter);
-app.use("/stats", statsRouter);
-app.use("/reports", reportsRouter);
-app.use("/sales", salesRouter);
+// Mount with /api prefix and without prefix for compatibility
+routes.forEach(({ path, router }) => {
+  app.use(`${prefix}${path}`, router);  // e.g., /api/auth
+  app.use(path, router);                 // e.g., /auth
+});
 
 // 404 handler
 app.use((req, res) => {
