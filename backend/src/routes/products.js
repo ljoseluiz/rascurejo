@@ -4,6 +4,66 @@ import { requireCsrf } from "../middlewares/csrf.js";
 
 const router = express.Router();
 
+// GET /products/categories - List all categories (MUST be before /:id routes)
+// Returns array of category names as strings to match frontend expectations
+router.get("/categories", async (req, res, next) => {
+  try {
+    const categories = await prisma.product_categories.findMany({
+      orderBy: { name: "asc" },
+      select: { name: true },
+    });
+    const categoryNames = categories.map((c) => c.name);
+    res.json(categoryNames);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /products/brands - List all brands (MUST be before /:id routes)
+// Returns array of brand names as strings to match frontend expectations
+router.get("/brands", async (req, res, next) => {
+  try {
+    const brands = await prisma.product_brands.findMany({
+      orderBy: { name: "asc" },
+      select: { name: true },
+    });
+    const brandNames = brands.map((b) => b.name);
+    res.json(brandNames);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /products/suppliers - List all suppliers (MUST be before /:id routes)
+// Returns array of supplier names as strings to match frontend expectations
+router.get("/suppliers", async (req, res, next) => {
+  try {
+    const suppliers = await prisma.suppliers.findMany({
+      orderBy: { name: "asc" },
+      select: { name: true },
+    });
+    const supplierNames = suppliers.map((s) => s.name);
+    res.json(supplierNames);
+  } catch (err) {
+    next(err);
+  }
+});
+
+// GET /products/units - List all units (MUST be before /:id routes)
+// Returns array of unit names as strings to match frontend expectations
+router.get("/units", async (req, res, next) => {
+  try {
+    const units = await prisma.product_units.findMany({
+      orderBy: { name: "asc" },
+      select: { name: true },
+    });
+    const unitNames = units.map((u) => u.name);
+    res.json(unitNames);
+  } catch (err) {
+    next(err);
+  }
+});
+
 // GET /products?q=&page=&limit=
 router.get("/", async (req, res, next) => {
   try {

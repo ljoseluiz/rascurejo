@@ -4,7 +4,58 @@ import { prisma } from "./prisma.js";
 /**
  * Minimal session implementation using httpOnly cookie.
  * For production, use a store (Redis) and rotate session IDs.
+ * 
+ * COMPATIBILITY NOTE: In-memory session store added for development mode.
+ * This allows /auth/me to return user data when logged in.
+ * TODO: Replace with Redis or database-backed sessions in production
  */
+
+// Session configuration
+const SESSION_MAX_AGE_MS = 1000 * 60 * 60 * 12; // 12 hours
+const SESSION_CLEANUP_INTERVAL_MS = 1000 * 60 * 30; // 30 minutes
+
+// In-memory session store for development (Map<sessionId, userData>)
+const sessionStore = new Map();
+
+// Cleanup interval reference (only start once)
+let cleanupInterval = null;
+
+/**
+ * Start periodic cleanup of expired sessions to prevent memory leaks.
+ * Should be called once during server initialization.
+ * 
+ * The cleanup runs every 30 minutes and removes sessions older than 12 hours.
+ * Safe to call multiple times - subsequent calls are ignored if already started.
+ * Uses unref() to allow Node.js to exit gracefully even with active interval.
+ */
+export function startSessionCleanup() {
+  if (cleanupInterval) return; // Already started
+  
+  cleanupInterval = setInterval(() => {
+    const now = Date.now();
+    for (const [sid, data] of sessionStore.entries()) {
+      if (now - data.createdAt > SESSION_MAX_AGE_MS) {
+        sessionStore.delete(sid);
+      }
+    }
+  }, SESSION_CLEANUP_INTERVAL_MS);
+  
+  // Allow Node to exit even if interval is running
+  cleanupInterval.unref();
+}
+
+/**
+ * Stop session cleanup (mainly for testing).
+ * Safe to call multiple times - does nothing if cleanup not started.
+ * 
+ * @returns {void}
+ */
+export function stopSessionCleanup() {
+  if (cleanupInterval) {
+    clearInterval(cleanupInterval);
+    cleanupInterval = null;
+  }
+}
 
 function hashPassword(password) {
   // Replace with bcrypt in a real deployment
@@ -22,12 +73,20 @@ export async function validateUser(username, password) {
 export async function createSessionCookie(res, user) {
   // naive session id; prefer signed/opaque token tied to a store
   const sid = crypto.randomBytes(18).toString("hex");
-  // In production, persist session <sid, userId, expiry> in a store
+  
+  // Store user data in session store (development mode)
+  sessionStore.set(sid, {
+    id: user.id,
+    username: user.username,
+    role: user.role,
+    createdAt: Date.now(),
+  });
+  
   res.cookie("session", sid, {
     httpOnly: true,
     sameSite: "lax",
     secure: process.env.NODE_ENV === "production",
-    maxAge: 1000 * 60 * 60 * 12, // 12 hours
+    maxAge: SESSION_MAX_AGE_MS,
   });
   return sid;
 }
@@ -39,7 +98,23 @@ export function clearSessionCookie(res) {
 export async function getUserFromSession(req) {
   const sid = req.cookies?.session;
   if (!sid) return null;
-  // For demo purposes sid is not persisted. Assume user id in header? Not safe.
-  // Here we’ll just return null unless future enhancement binds sid to store.
-  return null;
+  
+  // Retrieve user from in-memory store
+  const userData = sessionStore.get(sid);
+  if (!userData) return null;
+  
+  // Check if session expired
+  if (Date.now() - userData.createdAt > SESSION_MAX_AGE_MS) {
+    sessionStore.delete(sid);
+    return null;
+  }
+  
+  return userData;
+}
+
+// Clear session from store on logout
+export function clearSession(sid) {
+  if (sid) {
+    sessionStore.delete(sid);
+  }
 }
